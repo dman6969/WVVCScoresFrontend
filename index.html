@@ -824,11 +824,11 @@
 
         // Update team names
         async function updateTeamNames() {
-          const index = parseInt(document.getElementById('team1Name').value);
-          if (isNaN(index)) return;
- 
-          const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`).then(res => res.json());
- 
+          const matchId = document.getElementById('team1Name').value;
+          if (!matchId) return;
+
+          const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`).then(res => res.json());
+
           displayTeam1.textContent = selectedMatch.team1;
           displayTeam2.textContent = selectedMatch.team2;
           historyTeam1.textContent = selectedMatch.team1;
