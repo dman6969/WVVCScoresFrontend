@@ -482,7 +482,7 @@
  
               const match = { division, round, court, team1, team2, time };
  
-              const response = await fetch('http://localhost:3000/api/matches', {
+              const response = await fetch('https://wvvcscorerbackend.onrender.com/api/matches', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(match)
@@ -554,7 +554,7 @@
                 return;
               }
             
-              const response = await fetch('http://localhost:3000/api/teams', {
+              const response = await fetch('https://wvvcscorerbackend.onrender.com/api/teams', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, division })
@@ -567,7 +567,7 @@
             });
             document.getElementById('resetScoresBtn').addEventListener('click', async () => {
               if (confirm('Are you sure you want to reset all match scores?')) {
-                await fetch('http://localhost:3000/api/matches', { method: 'DELETE' });
+                await fetch('https://wvvcscorerbackend.onrender.com/api/matches', { method: 'DELETE' });
                 loadMatches();
                 loadStandings();
               }
@@ -752,14 +752,14 @@
               alert("Invalid match selected.");
               return;
             }
-            const selectedMatch = await fetch(`http://localhost:3000/api/matches/${index}`).then(res => res.json());
+            const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`).then(res => res.json());
 
             const matchWinner = team1Sets > team2Sets ? selectedMatch.team1 : selectedMatch.team2;
 
     const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
     const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
 
-    await fetch(`http://localhost:3000/api/matches/${index}`, {
+    await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -831,7 +831,7 @@
           const index = parseInt(document.getElementById('team1Name').value);
           if (isNaN(index)) return;
  
-          const selectedMatch = await fetch(`http://localhost:3000/api/matches/${index}`).then(res => res.json());
+          const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`).then(res => res.json());
  
           displayTeam1.textContent = selectedMatch.team1;
           displayTeam2.textContent = selectedMatch.team2;
@@ -884,7 +884,7 @@
  
           const selectedDivision = divisionSelect.value;
  
-          fetch('http://localhost:3000/api/matches')
+          fetch('https://wvvcscorerbackend.onrender.com/api/matches')
             .then(res => res.json())
             .then(matches => {
               const filtered = matches.filter(m => m.division === selectedDivision);
@@ -945,7 +945,7 @@
         }
 
   async function loadStandings() {
-  const response = await fetch('http://localhost:3000/api/teams');
+  const response = await fetch('https://wvvcscorerbackend.onrender.com/api/teams');
   const allTeams = await response.json();
   const divisionFilter = document.getElementById('standingsDivisionSelect').value;
 
@@ -969,7 +969,7 @@
   }
 
   async function loadTeams() {
-    const response = await fetch('http://localhost:3000/api/teams');
+    const response = await fetch('https://wvvcscorerbackend.onrender.com/api/teams');
     const teams = await response.json();
 
     const list = document.getElementById('teamsList');
@@ -1004,14 +1004,14 @@
   }
 
   async function deleteTeam(name) {
-    await fetch(`http://localhost:3000/api/teams/${encodeURIComponent(name)}`, {
+    await fetch(`https://wvvcscorerbackend.onrender.com/api/teams/${encodeURIComponent(name)}`, {
       method: 'DELETE'
     });
     loadTeams();
   }
   
   async function loadMatches() {
-    const response = await fetch('http://localhost:3000/api/matches');
+    const response = await fetch('https://wvvcscorerbackend.onrender.com/api/matches');
     const matches = await response.json();
   
     const list = document.getElementById('matchList');
@@ -1045,7 +1045,7 @@
   }
   
     async function deleteMatch(index) {
-        await fetch(`http://localhost:3000/api/matches/${index}`, {
+        await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`, {
           method: 'DELETE'
         });
         loadMatches();
