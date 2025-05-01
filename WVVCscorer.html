@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WVVCScores - Beach Volleyball Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .score-btn {
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        .score-btn:active {
+            transform: scale(0.95);
+        }
+        .swipe-left {
+            animation: swipeLeft 0.3s forwards;
+        }
+        .swipe-right {
+            animation: swipeRight 0.3s forwards;
+        }
+        @keyframes swipeLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50px); opacity: 0; }
+        }
+        @keyframes swipeRight {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50px); opacity: 0; }
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .bracket-line {
+            position: absolute;
+            background-color: #4b5563;
+        }
+        .bracket-match {
+            min-height: 60px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Admin Login</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2" for="username">Username</label>
+                <input type="text" id="username" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-2" for="password">Password</label>
+                <input type="password" id="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-between">
+                <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Login</button>
+                <button id="guestBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">Continue as Guest</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Switch Sides Modal -->
+    <div id="switchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Switch Sides</h2>
+            <p class="text-center mb-6">Teams should switch sides after every 7 total points scored.</p>
+            <div class="flex justify-center">
+                <button id="confirmSwitch" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <div class="flex justify-center items-center mb-4">
+                <i class="fas fa-volleyball-ball text-4xl text-orange-500 mr-3"></i>
+                <h1 class="text-4xl font-bold text-blue-800">WVVCScores</h1>
+            </div>
+            <p class="text-lg text-gray-600">Official Score Tracker for WVVC Tournaments</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="flex border-b mb-8">
+            <button id="scoreTab" class="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">Score Tracker</button>
+            <button id="bracketTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Bracket</button>
+            <button id="standingsTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Standings</button>
+            <button id="adminTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600 hidden">Admin</button>
+            <button id="logoutBtn" class="ml-auto px-4 py-2 font-medium text-red-600 hover:text-red-800 hidden">Logout</button>
+        </div>
+
+        <!-- Score Tracker Section -->
+        <section id="scoreSection" class="mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Current Match</h2>
+                
+                <div class="flex justify-between items-center mb-8">
+                    <div class="text-center w-1/3">
+                        <input type="text" id="team1Name" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Team 1 Name" value="Team A">
+                    </div>
+                    <div class="text-center text-gray-500">VS</div>
+                    <div class="text-center w-1/3">
+                        <input type="text" id="team2Name" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Team 2 Name" value="Team B">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-blue-50 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold mb-2" id="displayTeam1">Team A</h3>
+                        <div class="text-5xl font-bold mb-4" id="team1Score">0</div>
+                        <div class="flex justify-center space-x-4">
+                            <button class="score-btn bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700" id="team1Add">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="score-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" id="team1Remove">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold mb-2" id="displayTeam2">Team B</h3>
+                        <div class="text-5xl font-bold mb-4" id="team2Score">0</div>
+                        <div class="flex justify-center space-x-4">
+                            <button class="score-btn bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700" id="team2Add">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="score-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" id="team2Remove">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-center">Match Progress</h3>
+                    <div class="flex justify-center mb-4">
+                        <div class="flex space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="set1Indicator">1</div>
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="set2Indicator">2</div>
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="set3Indicator">3</div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="newSetBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 mr-2">New Set</button>
+                        <button id="endMatchBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">End Match</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Match History</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">Set</th>
+                                <th class="py-2 px-4 border-b" id="historyTeam1">Team A</th>
+                                <th class="py-2 px-4 border-b" id="historyTeam2">Team B</th>
+                                <th class="py-2 px-4 border-b">Winner</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matchHistory">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tournament Bracket Section -->
+        <section id="bracketSection" class="mb-8 hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center text-blue-800">Tournament Bracket</h2>
+                
+                <div class="flex justify-between mb-6">
+                    <div>
+                        <label class="mr-2">Division:</label>
+                        <select id="divisionSelect" class="px-3 py-2 border rounded-lg">
+                            <option value="mens">Men's Division</option>
+                            <option value="womens">Women's Division</option>
+                            <option value="mixed">Mixed Division</option>
+                        </select>
+                    </div>
+                    <button id="generateBracketBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hidden">Generate Bracket</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <div id="bracketContainer" class="relative min-w-max py-8">
+                        <!-- Bracket will be generated here -->
+                        <div class="text-center text-gray-500">Bracket will be displayed here once the tournament starts</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Standings Section -->
+        <section id="standingsSection" class="mb-8 hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center text-blue-800">Tournament Standings</h2>
+                
+                <div class="flex justify-between mb-6">
+                    <div>
+                        <label class="mr-2">Division:</label>
+                        <select id="standingsDivisionSelect" class="px-3 py-2 border rounded-lg">
+                            <option value="mens">Men's Division</option>
+                            <option value="womens">Women's Division</option>
+                            <option value="mixed">Mixed Division</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">Position</th>
+                                <th class="py-2 px-4 border-b">Team</th>
+                                <th class="py-2 px-4 border-b">Matches Played</th>
+                                <th class="py-2 px-4 border-b">Sets Won</th>
+                                <th class="py-2 px-4 border-b">Points</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standingsTable">
+                            <tr>
+                                <td class="py-2 px-4 border-b text-center">1</td>
+                                <td class="py-2 px-4 border-b">Team A</td>
+                                <td class="py-2 px-4 border-b text-center">2</td>
+                                <td class="py-2 px-4 border-b text-center">4</td>
+                                <td class="py-2 px-4 border-b text-center">84</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-4 border-b text-center">2</td>
+                                <td class="py-2 px-4 border-b">Team B</td>
+                                <td class="py-2 px-4 border-b text-center">2</td>
+                                <td class="py-2 px-4 border-b text-center">3</td>
+                                <td class="py-2 px-4 border-b text-center">76</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-4 border-b text-center">3</td>
+                                <td class="py-2 px-4 border-b">Team C</td>
+                                <td class="py-2 px-4 border-b text-center">1</td>
+                                <td class="py-2 px-4 border-b text-center">1</td>
+                                <td class="py-2 px-4 border-b text-center">35</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-4 border-b text-center">4</td>
+                                <td class="py-2 px-4 border-b">Team D</td>
+                                <td class="py-2 px-4 border-b text-center">1</td>
+                                <td class="py-2 px-4 border-b text-center">0</td>
+                                <td class="py-2 px-4 border-b text-center">28</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section id="adminSection" class="mb-8 hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center text-blue-800">Tournament Administration</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Teams Management -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Teams Management</h3>
+                        <div class="mb-4">
+                            <label class="block mb-2">Team Name:</label>
+                            <input type="text" id="newTeamName" class="w-full px-3 py-2 border rounded-lg mb-2" placeholder="Enter team name">
+                            <label class="block mb-2">Division:</label>
+                            <select id="newTeamDivision" class="w-full px-3 py-2 border rounded-lg mb-4">
+                                <option value="mens">Men's Division</option>
+                                <option value="womens">Women's Division</option>
+                                <option value="mixed">Mixed Division</option>
+                            </select>
+                            <button id="addTeamBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">Add Team</button>
+                        </div>
+                        <div>
+                            <label class="block mb-2">Current Teams:</label>
+                            <ul id="teamsList" class="border rounded-lg divide-y">
+                                <li class="px-3 py-2 flex justify-between">
+                                    <span>Team A (Men's)</span>
+                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                </li>
+                                <li class="px-3 py-2 flex justify-between">
+                                    <span>Team B (Women's)</span>
+                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Tournament Setup -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Tournament Setup</h3>
+                        <div class="mb-4">
+                            <label class="block mb-2">Tournament Name:</label>
+                            <input type="text" id="tournamentName" class="w-full px-3 py-2 border rounded-lg mb-4" value="West Valley Beach Volleyball Tournament">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block mb-2">Match Format:</label>
+                            <select id="matchFormat" class="w-full px-3 py-2 border rounded-lg mb-2">
+                                <option value="bestOf3">Best of 3 Sets</option>
+                                <option value="bestOf5">Best of 5 Sets</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block mb-2">Points to Win Set:</label>
+                            <input type="number" id="pointsToWin" class="w-full px-3 py-2 border rounded-lg" value="21" min="15">
+                        </div>
+                        <div class="mb-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="switchSides" class="mr-2" checked>
+                                <span>Switch sides every 7 points</span>
+                            </label>
+                        </div>
+                        <button id="saveSettingsBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full">Save Settings</button>
+                    </div>
+                    
+                    <!-- Schedule Matches -->
+                    <div class="bg-gray-50 rounded-lg p-4 md:col-span-2">
+                        <h3 class="text-lg font-semibold mb-4">Schedule Matches</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block mb-2">Division:</label>
+                                <select id="scheduleDivision" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="mens">Men's Division</option>
+                                    <option value="womens">Women's Division</option>
+                                    <option value="mixed">Mixed Division</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Round:</label>
+                                <select id="scheduleRound" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="round1">Round 1</option>
+                                    <option value="round2">Round 2</option>
+                                    <option value="quarter">Quarter Finals</option>
+                                    <option value="semi">Semi Finals</option>
+                                    <option value="final">Final</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Court:</label>
+                                <select id="scheduleCourt" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="1">Court 1</option>
+                                    <option value="2">Court 2</option>
+                                    <option value="3">Court 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block mb-2">Team 1:</label>
+                                <select id="scheduleTeam1" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="">Select Team</option>
+                                    <option value="teamA">Team A</option>
+                                    <option value="teamB">Team B</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Team 2:</label>
+                                <select id="scheduleTeam2" class="w-full px-3 py-2 border rounded-lg">
+                                    <option value="">Select Team</option>
+                                    <option value="teamA">Team A</option>
+                                    <option value="teamB">Team B</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block mb-2">Match Time:</label>
+                            <input type="datetime-local" id="matchTime" class="w-full px-3 py-2 border rounded-lg">
+                        </div>
+                        <button id="scheduleMatchBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">Schedule Match</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // App State
+        const state = {
+            isAdmin: false,
+            currentSet: 1,
+            sets: {
+                1: { team1: 0, team2: 0 },
+                2: { team1: 0, team2: 0 },
+                3: { team1: 0, team2: 0 }
+            },
+            matchHistory: [],
+            totalPoints: 0,
+            teams: [
+                { name: "Team A", division: "mens", matchesPlayed: 2, setsWon: 4, points: 84 },
+                { name: "Team B", division: "womens", matchesPlayed: 2, setsWon: 3, points: 76 },
+                { name: "Team C", division: "mixed", matchesPlayed: 1, setsWon: 1, points: 35 },
+                { name: "Team D", division: "mens", matchesPlayed: 1, setsWon: 0, points: 28 }
+            ],
+            tournamentSettings: {
+                name: "West Valley Beach Volleyball Tournament",
+                format: "bestOf3",
+                pointsToWin: 21,
+                switchSides: true
+            }
+        };
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const switchModal = document.getElementById('switchModal');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const guestBtn = document.getElementById('guestBtn');
+        const confirmSwitch = document.getElementById('confirmSwitch');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const scoreSection = document.getElementById('scoreSection');
+        const bracketSection = document.getElementById('bracketSection');
+        const standingsSection = document.getElementById('standingsSection');
+        const adminSection = document.getElementById('adminSection');
+        
+        const scoreTab = document.getElementById('scoreTab');
+        const bracketTab = document.getElementById('bracketTab');
+        const standingsTab = document.getElementById('standingsTab');
+        const adminTab = document.getElementById('adminTab');
+        
+        const team1Name = document.getElementById('team1Name');
+        const team2Name = document.getElementById('team2Name');
+        const displayTeam1 = document.getElementById('displayTeam1');
+        const displayTeam2 = document.getElementById('displayTeam2');
+        const historyTeam1 = document.getElementById('historyTeam1');
+        const historyTeam2 = document.getElementById('historyTeam2');
+        const team1Score = document.getElementById('team1Score');
+        const team2Score = document.getElementById('team2Score');
+        const team1Add = document.getElementById('team1Add');
+        const team2Add = document.getElementById('team2Add');
+        const team1Remove = document.getElementById('team1Remove');
+        const team2Remove = document.getElementById('team2Remove');
+        const set1Indicator = document.getElementById('set1Indicator');
+        const set2Indicator = document.getElementById('set2Indicator');
+        const set3Indicator = document.getElementById('set3Indicator');
+        const newSetBtn = document.getElementById('newSetBtn');
+        const endMatchBtn = document.getElementById('endMatchBtn');
+        const matchHistory = document.getElementById('matchHistory');
+        
+        const generateBracketBtn = document.getElementById('generateBracketBtn');
+        const divisionSelect = document.getElementById('divisionSelect');
+        const bracketContainer = document.getElementById('bracketContainer');
+        
+        const standingsDivisionSelect = document.getElementById('standingsDivisionSelect');
+        const standingsTable = document.getElementById('standingsTable');
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show login modal
+            loginModal.style.display = 'flex';
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Update UI
+            updateSetIndicator();
+            updateTeamNames();
+        });
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Login
+            loginBtn.addEventListener('click', handleLogin);
+            guestBtn.addEventListener('click', handleGuest);
+            logoutBtn.addEventListener('click', handleLogout);
+            
+            // Score tracking
+            team1Add.addEventListener('click', () => handleScoreChange('team1', 1));
+            team2Add.addEventListener('click', () => handleScoreChange('team2', 1));
+            team1Remove.addEventListener('click', () => handleScoreChange('team1', -1));
+            team2Remove.addEventListener('click', () => handleScoreChange('team2', -1));
+            
+            // Touch events for swipe
+            team1Add.addEventListener('touchstart', handleTouchStart);
+            team1Add.addEventListener('touchend', (e) => handleTouchEnd(e, 'team1', 1));
+            team2Add.addEventListener('touchstart', handleTouchStart);
+            team2Add.addEventListener('touchend', (e) => handleTouchEnd(e, 'team2', 1));
+            team1Remove.addEventListener('touchstart', handleTouchStart);
+            team1Remove.addEventListener('touchend', (e) => handleTouchEnd(e, 'team1', -1));
+            team2Remove.addEventListener('touchstart', handleTouchStart);
+            team2Remove.addEventListener('touchend', (e) => handleTouchEnd(e, 'team2', -1));
+            
+            // Match controls
+            newSetBtn.addEventListener('click', startNewSet);
+            endMatchBtn.addEventListener('click', endCurrentMatch);
+            confirmSwitch.addEventListener('click', () => switchModal.style.display = 'none');
+            
+            // Team name changes
+            team1Name.addEventListener('change', updateTeamNames);
+            team2Name.addEventListener('change', updateTeamNames);
+            
+            // Navigation tabs
+            scoreTab.addEventListener('click', () => showSection('score'));
+            bracketTab.addEventListener('click', () => showSection('bracket'));
+            standingsTab.addEventListener('click', () => showSection('standings'));
+            adminTab.addEventListener('click', () => showSection('admin'));
+            
+            // Admin controls
+            // (Additional admin event listeners would be added here)
+        }
+
+        // Handle login
+        function handleLogin() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            
+            if (username === 'admin' && password === 'admin') {
+                state.isAdmin = true;
+                loginModal.style.display = 'none';
+                adminTab.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                generateBracketBtn.classList.remove('hidden');
+                showSection('score');
+            } else {
+                alert('Invalid credentials. Try admin/admin or continue as guest.');
+            }
+        }
+
+        // Handle guest login
+        function handleGuest() {
+            state.isAdmin = false;
+            loginModal.style.display = 'none';
+            showSection('score');
+        }
+
+        // Handle logout
+        function handleLogout() {
+            state.isAdmin = false;
+            adminTab.classList.add('hidden');
+            logoutBtn.classList.add('hidden');
+            generateBracketBtn.classList.add('hidden');
+            showSection('score');
+        }
+
+        // Show a specific section
+        function showSection(section) {
+            scoreSection.classList.add('hidden');
+            bracketSection.classList.add('hidden');
+            standingsSection.classList.add('hidden');
+            adminSection.classList.add('hidden');
+            
+            // Reset tab styles
+            scoreTab.classList.remove('text-blue-600', 'border-blue-600');
+            scoreTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            bracketTab.classList.remove('text-blue-600', 'border-blue-600');
+            bracketTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            standingsTab.classList.remove('text-blue-600', 'border-blue-600');
+            standingsTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            adminTab.classList.remove('text-blue-600', 'border-blue-600');
+            adminTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            
+            switch(section) {
+                case 'score':
+                    scoreSection.classList.remove('hidden');
+                    scoreTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    scoreTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'bracket':
+                    bracketSection.classList.remove('hidden');
+                    bracketTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    bracketTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'standings':
+                    standingsSection.classList.remove('hidden');
+                    standingsTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    standingsTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'admin':
+                    adminSection.classList.remove('hidden');
+                    adminTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    adminTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+            }
+        }
+
+        // Handle score changes
+        function handleScoreChange(team, change) {
+            const currentScore = state.sets[state.currentSet][team];
+            const newScore = currentScore + change;
+            
+            if (newScore >= 0) {
+                state.sets[state.currentSet][team] = newScore;
+                updateScores();
+                
+                // Add swipe animation
+                const btn = team === 'team1' ? 
+                    (change > 0 ? team1Add : team1Remove) : 
+                    (change > 0 ? team2Add : team2Remove);
+                
+                btn.classList.add(change > 0 ? 'swipe-right' : 'swipe-left');
+                setTimeout(() => {
+                    btn.classList.remove('swipe-right', 'swipe-left');
+                }, 300);
+                
+                // Check for side switch (every 7 total points)
+                if (change > 0) {
+                    state.totalPoints++;
+                    if (state.totalPoints % 7 === 0 && state.tournamentSettings.switchSides) {
+                        setTimeout(() => {
+                            switchModal.style.display = 'flex';
+                        }, 500);
+                    }
+                } else {
+                    state.totalPoints--;
+                }
+                
+                // Check for set win
+                checkSetWin();
+            }
+        }
+
+        // Check if a set has been won
+        function checkSetWin() {
+            const team1Score = state.sets[state.currentSet].team1;
+            const team2Score = state.sets[state.currentSet].team2;
+            const pointsToWin = state.tournamentSettings.pointsToWin;
+            
+            if (team1Score >= pointsToWin && team1Score >= team2Score + 2) {
+                // Team 1 wins the set
+                addSetToHistory(state.currentSet, 'team1');
+                if (state.currentSet === 3) {
+                    endCurrentMatch();
+                } else {
+                    setTimeout(() => {
+                        startNewSet();
+                    }, 1000);
+                }
+            } else if (team2Score >= pointsToWin && team2Score >= team1Score + 2) {
+                // Team 2 wins the set
+                addSetToHistory(state.currentSet, 'team2');
+                if (state.currentSet === 3) {
+                    endCurrentMatch();
+                } else {
+                    setTimeout(() => {
+                        startNewSet();
+                    }, 1000);
+                }
+            }
+        }
+
+        // Add set to match history
+        function addSetToHistory(setNumber, winner) {
+            const setResult = {
+                set: setNumber,
+                team1: state.sets[setNumber].team1,
+                team2: state.sets[setNumber].team2,
+                winner: winner === 'team1' ? team1Name.value : team2Name.value
+            };
+            
+            state.matchHistory.push(setResult);
+            updateMatchHistory();
+        }
+
+        // Start a new set
+        function startNewSet() {
+            if (state.currentSet < 3) {
+                state.currentSet++;
+                state.sets[state.currentSet] = { team1: 0, team2: 0 };
+                state.totalPoints = 0;
+                updateScores();
+                updateSetIndicator();
+            }
+        }
+
+        // End the current match
+        function endCurrentMatch() {
+            // Determine match winner
+            let team1Sets = 0;
+            let team2Sets = 0;
+            
+            for (let i = 1; i <= 3; i++) {
+                if (state.sets[i].team1 > state.sets[i].team2) team1Sets++;
+                else if (state.sets[i].team2 > state.sets[i].team1) team2Sets++;
+            }
+            
+            const matchWinner = team1Sets > team2Sets ? team1Name.value : team2Name.value;
+            
+            // Reset for new match
+            state.currentSet = 1;
+            state.sets = {
+                1: { team1: 0, team2: 0 },
+                2: { team1: 0, team2: 0 },
+                3: { team1: 0, team2: 0 }
+            };
+            state.totalPoints = 0;
+            state.matchHistory = [];
+            
+            updateScores();
+            updateSetIndicator();
+            updateMatchHistory();
+            
+            alert(`Match complete! Winner: ${matchWinner}`);
+        }
+
+        // Update scores display
+        function updateScores() {
+            team1Score.textContent = state.sets[state.currentSet].team1;
+            team2Score.textContent = state.sets[state.currentSet].team2;
+        }
+
+        // Update set indicator
+        function updateSetIndicator() {
+            set1Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+            set2Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+            set3Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+            
+            if (state.currentSet === 1) {
+                set1Indicator.classList.add('bg-blue-600', 'text-white');
+                set2Indicator.classList.add('bg-gray-300');
+                set3Indicator.classList.add('bg-gray-300');
+            } else if (state.currentSet === 2) {
+                set1Indicator.classList.add('bg-gray-300');
+                set2Indicator.classList.add('bg-blue-600', 'text-white');
+                set3Indicator.classList.add('bg-gray-300');
+            } else {
+                set1Indicator.classList.add('bg-gray-300');
+                set2Indicator.classList.add('bg-gray-300');
+                set3Indicator.classList.add('bg-blue-600', 'text-white');
+            }
+        }
+
+        // Update team names
+        function updateTeamNames() {
+            displayTeam1.textContent = team1Name.value;
+            displayTeam2.textContent = team2Name.value;
+            historyTeam1.textContent = team1Name.value;
+            historyTeam2.textContent = team2Name.value;
+        }
+
+        // Update match history table
+        function updateMatchHistory() {
+            matchHistory.innerHTML = '';
+            
+            state.matchHistory.forEach(match => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="py-2 px-4 border-b text-center">${match.set}</td>
+                    <td class="py-2 px-4 border-b text-center ${match.winner === team1Name.value ? 'font-bold text-green-600' : ''}">${match.team1}</td>
+                    <td class="py-2 px-4 border-b text-center ${match.winner === team2Name.value ? 'font-bold text-green-600' : ''}">${match.team2}</td>
+                    <td class="py-2 px-4 border-b text-center">${match.winner}</td>
+                `;
+                
+                matchHistory.appendChild(row);
+            });
+        }
+
+        // Touch event handling for swipe gestures
+        let touchStartX = 0;
+        
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+        
+        function handleTouchEnd(e, team, change) {
+            const touchEndX = e.changedTouches[0].screenX;
+            const diffX = touchEndX - touchStartX;
+            
+            // If swipe right (add point)
+            if (diffX > 50 && change > 0) {
+                handleScoreChange(team, change);
+            }
+            // If swipe left (remove point)
+            else if (diffX < -50 && change < 0) {
+                handleScoreChange(team, change);
+            }
+        }
+
+        // Generate bracket (simplified for demo)
+        function generateBracket() {
+            bracketContainer.innerHTML = '';
+            
+            // Create a simple bracket structure
+            const bracket = document.createElement('div');
+            bracket.className = 'flex flex-col items-center';
+            
+            // Quarter finals
+            const quarters = document.createElement('div');
+            quarters.className = 'flex justify-around w-full mb-8';
+            
+            for (let i = 0; i < 4; i++) {
+                const match = createBracketMatch(`QF ${i+1}`, "Team X", "Team Y");
+                quarters.appendChild(match);
+            }
+            
+            bracket.appendChild(quarters);
+            
+            // Semi finals
+            const semis = document.createElement('div');
+            semis.className = 'flex justify-around w-3/4 mb-8';
+            
+            for (let i = 0; i < 2; i++) {
+                const match = createBracketMatch(`SF ${i+1}`, "Winner QF " + (i*2+1), "Winner QF " + (i*2+2));
+                semis.appendChild(match);
+            }
+            
+            bracket.appendChild(semis);
+            
+            // Final
+            const final = document.createElement('div');
+            final.className = 'flex justify-center';
+            
+            const match = createBracketMatch("Final", "Winner SF 1", "Winner SF 2");
+            final.appendChild(match);
+            
+            bracket.appendChild(final);
+            
+            bracketContainer.appendChild(bracket);
+        }
+        
+        function createBracketMatch(round, team1, team2) {
+            const match = document.createElement('div');
+            match.className = 'bg-white p-3 rounded-lg shadow-sm border relative bracket-match';
+            match.style.minWidth = '180px';
+            
+            match.innerHTML = `
+                <div class="text-xs font-semibold text-gray-500 mb-1">${round}</div>
+                <div class="text-sm mb-1">${team1}</div>
+                <div class="text-sm">${team2}</div>
+                ${state.isAdmin ? `
+                <div class="mt-2 flex justify-between text-xs">
+                    <button class="text-green-600">${team1} wins</button>
+                    <button class="text-green-600">${team2} wins</button>
+                </div>
+                ` : ''}
+            `;
+            
+            return match;
+        }
+
+        // Event listeners for admin controls
+        if (generateBracketBtn) {
+            generateBracketBtn.addEventListener('click', generateBracket);
+        }
+    </script>
+</body>
+</html>
