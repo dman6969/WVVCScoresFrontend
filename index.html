@@ -747,35 +747,31 @@
                 else if (state.sets[i].team2 > state.sets[i].team1) team2Sets++;
             }
 
-            const index = parseInt(document.getElementById('team1Name').value);
-            if (isNaN(index)) {
-              alert("Invalid match selected.");
-              return;
-            }
-            const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`).then(res => res.json());
+            const matchId = document.getElementById('team1Name').value;
+            const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`).then(res => res.json());
 
             const matchWinner = team1Sets > team2Sets ? selectedMatch.team1 : selectedMatch.team2;
 
-    const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
-    const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
+            const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
+            const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
 
-    await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        team1Score: totalTeam1Score,
-        team2Score: totalTeam2Score,
-        division: selectedMatch.division,
-        finalized: true
-      })
-    });
-    
-    // Count wins/losses for teams based on total scores
-    if (totalTeam1Score > totalTeam2Score) {
-      // Team1 wins: update win for team1 and loss for team2 as needed
-    } else if (totalTeam2Score > totalTeam1Score) {
-      // Team2 wins: update win for team2 and loss for team1 as needed
-    }
+            await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                team1Score: totalTeam1Score,
+                team2Score: totalTeam2Score,
+                division: selectedMatch.division,
+                finalized: true
+              })
+            });
+            
+            // Count wins/losses for teams based on total scores
+            if (totalTeam1Score > totalTeam2Score) {
+              // Team1 wins: update win for team1 and loss for team2 as needed
+            } else if (totalTeam2Score > totalTeam1Score) {
+              // Team2 wins: update win for team2 and loss for team1 as needed
+            }
 
             // Reset for new match
             state.currentSet = 1;
@@ -1036,7 +1032,7 @@
 
     matches.forEach((match, index) => {
       const option = document.createElement('option');
-      option.value = index;
+      option.value = match._id;
       option.textContent = `${match.team1} vs ${match.team2}`;
       team1Name.appendChild(option);
     });
