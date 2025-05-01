@@ -748,7 +748,13 @@
             }
 
             const matchId = document.getElementById('team1Name').value;
-            const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`).then(res => res.json());
+            const matchRes = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`);
+            if (!matchRes.ok) {
+                console.error("Failed to fetch match", matchRes.status);
+                alert("Failed to load match data.");
+                return;
+            }
+            const selectedMatch = await matchRes.json();
 
             const matchWinner = team1Sets > team2Sets ? selectedMatch.team1 : selectedMatch.team2;
 
