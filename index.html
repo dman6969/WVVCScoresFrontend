@@ -458,7 +458,7 @@
         const standingsTable = document.getElementById('standingsTable');
         
         // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Ensure setWins is initialized before any set logic
             if (!state.setWins || typeof state.setWins.team1 !== 'number' || typeof state.setWins.team2 !== 'number') {
                 state.setWins = { team1: 0, team2: 0 };
@@ -498,9 +498,10 @@
             
             // Update UI
             updateSetIndicator();
-            updateTeamNames();
+            await updateTeamNames();
             loadTeams();
-            loadMatches();
+            await loadMatches();
+            await updateTeamNames();
             document.getElementById('standingsDivisionSelect').addEventListener('change', loadStandings);
             loadStandings();
             setInterval(loadStandings, 30000); // refresh every 30 seconds
@@ -532,7 +533,10 @@
             // Match controls
             newSetBtn.addEventListener('click', startNewSet);
             endMatchBtn.addEventListener('click', endCurrentMatch);
-            confirmSwitch.addEventListener('click', () => switchModal.style.display = 'none');
+            confirmSwitch.addEventListener('click', () => {
+              switchModal.style.display = 'none';
+              swapSides();
+            });
             
             // Team name changes
             team1Name.addEventListener('change', updateTeamNames);
@@ -1078,6 +1082,7 @@
     });
 
     document.getElementById('team2Name').style.display = 'none';
+    await updateTeamNames();
   }
   
     async function deleteMatch(index) {
@@ -1104,3 +1109,23 @@
     </script>
 </body>
 </html>
+
+        // Swap team sides display and scores
+        function swapSides() {
+          // Swap team display names
+          const tempName = displayTeam1.textContent;
+          displayTeam1.textContent = displayTeam2.textContent;
+          displayTeam2.textContent = tempName;
+
+          // Swap history headers too
+          const tempHistory = historyTeam1.textContent;
+          historyTeam1.textContent = historyTeam2.textContent;
+          historyTeam2.textContent = tempHistory;
+
+          // Swap scores in state
+          const tempScore = state.sets[state.currentSet].team1;
+          state.sets[state.currentSet].team1 = state.sets[state.currentSet].team2;
+          state.sets[state.currentSet].team2 = tempScore;
+
+          updateScores();
+        }
