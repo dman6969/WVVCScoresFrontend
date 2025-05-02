@@ -851,17 +851,26 @@
             }
         }
 
-        // Update team names
+        // Update team names with error handling
         async function updateTeamNames() {
           const matchId = document.getElementById('team1Name').value;
           if (!matchId) return;
 
-          const selectedMatch = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`).then(res => res.json());
+          try {
+            const res = await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`);
+            if (!res.ok) {
+              console.warn("Match not found:", matchId);
+              return;
+            }
+            const selectedMatch = await res.json();
 
-          displayTeam1.textContent = selectedMatch.team1;
-          displayTeam2.textContent = selectedMatch.team2;
-          historyTeam1.textContent = selectedMatch.team1;
-          historyTeam2.textContent = selectedMatch.team2;
+            displayTeam1.textContent = selectedMatch.team1;
+            displayTeam2.textContent = selectedMatch.team2;
+            historyTeam1.textContent = selectedMatch.team1;
+            historyTeam2.textContent = selectedMatch.team2;
+          } catch (err) {
+            console.error("Failed to load match data:", err);
+          }
         }
 
         // Update match history table
@@ -1106,26 +1115,27 @@
         toast.classList.add('hidden');
       }, 3000);
     }
-    </script>
+</script>
+<script>
+    // Swap team sides display and scores
+    function swapSides() {
+      // Swap team display names
+      const tempName = displayTeam1.textContent;
+      displayTeam1.textContent = displayTeam2.textContent;
+      displayTeam2.textContent = tempName;
+
+      // Swap history headers too
+      const tempHistory = historyTeam1.textContent;
+      historyTeam1.textContent = historyTeam2.textContent;
+      historyTeam2.textContent = tempHistory;
+
+      // Swap scores in state
+      const tempScore = state.sets[state.currentSet].team1;
+      state.sets[state.currentSet].team1 = state.sets[state.currentSet].team2;
+      state.sets[state.currentSet].team2 = tempScore;
+
+      updateScores();
+    }
+</script>
 </body>
 </html>
-
-        // Swap team sides display and scores
-        function swapSides() {
-          // Swap team display names
-          const tempName = displayTeam1.textContent;
-          displayTeam1.textContent = displayTeam2.textContent;
-          displayTeam2.textContent = tempName;
-
-          // Swap history headers too
-          const tempHistory = historyTeam1.textContent;
-          historyTeam1.textContent = historyTeam2.textContent;
-          historyTeam2.textContent = tempHistory;
-
-          // Swap scores in state
-          const tempScore = state.sets[state.currentSet].team1;
-          state.sets[state.currentSet].team1 = state.sets[state.currentSet].team2;
-          state.sets[state.currentSet].team2 = tempScore;
-
-          updateScores();
-        }
