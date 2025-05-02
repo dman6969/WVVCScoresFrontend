@@ -782,6 +782,9 @@
             const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
             const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
 
+            // Log set win info before sending to backend
+            console.log("📤 SENDING SET WINS:", state.setWins.team1, state.setWins.team2);
+
             await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
