@@ -870,10 +870,14 @@
             }
             const selectedMatch = await res.json();
 
-            displayTeam1.textContent = selectedMatch.blueTeam || selectedMatch.team1;
-            displayTeam2.textContent = selectedMatch.orangeTeam || selectedMatch.team2;
-            historyTeam1.textContent = selectedMatch.blueTeam || selectedMatch.team1;
-            historyTeam2.textContent = selectedMatch.orangeTeam || selectedMatch.team2;
+            // Explicit assignment: blue = blueTeam/team1, orange = orangeTeam/team2
+            const blueName = selectedMatch.blueTeam || selectedMatch.team1;
+            const orangeName = selectedMatch.orangeTeam || selectedMatch.team2;
+
+            displayTeam1.textContent = blueName;
+            displayTeam2.textContent = orangeName;
+            historyTeam1.textContent = blueName;
+            historyTeam2.textContent = orangeName;
           } catch (err) {
             console.error("Failed to load match data:", err);
           }
