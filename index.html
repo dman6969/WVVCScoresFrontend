@@ -1087,7 +1087,12 @@
     });
 
     document.getElementById('team2Name').style.display = 'none';
-    await updateTeamNames();
+
+    // Select first scheduled match by default and update team names
+    if (matches.length > 0) {
+      team1Name.value = matches[0]._id;
+      await updateTeamNames();
+    }
   }
   
     async function deleteMatch(index) {
@@ -1113,26 +1118,28 @@
     }
 </script>
 <script>
-    // Swap team sides display and scores
+    // Swap team sides display and scores, but preserve color blocks for each team
     function swapSides() {
-      // Swap displayed team names
+      // Swap display names only
       [displayTeam1.textContent, displayTeam2.textContent] = [displayTeam2.textContent, displayTeam1.textContent];
 
-      // Swap history table headers
+      // Swap history headers
       [historyTeam1.textContent, historyTeam2.textContent] = [historyTeam2.textContent, historyTeam1.textContent];
 
-      // Swap dropdown values
-      [team1Name.value, team2Name.value] = [team2Name.value, team1Name.value];
-
-      // Swap internal state scores
+      // Swap internal scores
       const tempScore = state.sets[state.currentSet].team1;
       state.sets[state.currentSet].team1 = state.sets[state.currentSet].team2;
       state.sets[state.currentSet].team2 = tempScore;
 
-      // Swap setWins values
+      // Swap set win counters
       const tempWins = state.setWins.team1;
       state.setWins.team1 = state.setWins.team2;
       state.setWins.team2 = tempWins;
+
+      // Swap only the *text*, not the entire block, so color blocks stay with teams
+      const tempScoreVal = team1Score.textContent;
+      team1Score.textContent = team2Score.textContent;
+      team2Score.textContent = tempScoreVal;
 
       updateScores();
     }
