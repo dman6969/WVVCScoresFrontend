@@ -478,7 +478,17 @@
                 return;
               }
 
-              const match = { division, round, court, team1, team2, time };
+              // Assign color roles explicitly
+              const match = {
+                division,
+                round,
+                court,
+                team1,
+                team2,
+                time,
+                blueTeam: team1,   // Assign Team 1 as the team to stay with the blue card
+                orangeTeam: team2  // Assign Team 2 as the team to stay with the orange card
+              };
 
               const response = await fetch('https://wvvcscorerbackend.onrender.com/api/matches', {
                 method: 'POST',
@@ -860,10 +870,10 @@
             }
             const selectedMatch = await res.json();
 
-            displayTeam1.textContent = selectedMatch.team1;
-            displayTeam2.textContent = selectedMatch.team2;
-            historyTeam1.textContent = selectedMatch.team1;
-            historyTeam2.textContent = selectedMatch.team2;
+            displayTeam1.textContent = selectedMatch.blueTeam || selectedMatch.team1;
+            displayTeam2.textContent = selectedMatch.orangeTeam || selectedMatch.team2;
+            historyTeam1.textContent = selectedMatch.blueTeam || selectedMatch.team1;
+            historyTeam2.textContent = selectedMatch.orangeTeam || selectedMatch.team2;
           } catch (err) {
             console.error("Failed to load match data:", err);
           }
