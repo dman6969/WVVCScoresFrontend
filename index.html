@@ -857,7 +857,7 @@
             }
         }
 
-        // Update team names with error handling
+        // Update team names and dropdowns with error handling
         async function updateTeamNames() {
           const matchId = document.getElementById('team1Name').value;
           if (!matchId) return;
@@ -873,6 +873,9 @@
             // Explicit assignment: blue = blueTeam/team1, orange = orangeTeam/team2
             const blueName = selectedMatch.blueTeam || selectedMatch.team1;
             const orangeName = selectedMatch.orangeTeam || selectedMatch.team2;
+
+            team1Name.innerHTML = `<option value="${selectedMatch._id}" selected>${blueName}</option>`;
+            team2Name.innerHTML = `<option value="${selectedMatch._id}" selected>${orangeName}</option>`;
 
             displayTeam1.textContent = blueName;
             displayTeam2.textContent = orangeName;
