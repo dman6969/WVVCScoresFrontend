@@ -140,7 +140,6 @@
                         <div class="flex space-x-2">
                             <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="set1Indicator">1</div>
                             <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="set2Indicator">2</div>
-                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="set3Indicator">3</div>
                         </div>
                     </div>
                     <div class="text-center">
@@ -384,8 +383,7 @@
             currentSet: 1,
             sets: {
                 1: { team1: 0, team2: 0 },
-                2: { team1: 0, team2: 0 },
-                3: { team1: 0, team2: 0 }
+                2: { team1: 0, team2: 0 }
             },
             matchHistory: [],
             totalPoints: 0,
@@ -447,7 +445,7 @@
         const team2Remove = document.getElementById('team2Remove');
         const set1Indicator = document.getElementById('set1Indicator');
         const set2Indicator = document.getElementById('set2Indicator');
-        const set3Indicator = document.getElementById('set3Indicator');
+        // const set3Indicator = document.getElementById('set3Indicator');
         const newSetBtn = document.getElementById('newSetBtn');
         const endMatchBtn = document.getElementById('endMatchBtn');
         const matchHistory = document.getElementById('matchHistory');
@@ -703,10 +701,8 @@
                 // Team 1 wins the set
                 addSetToHistory(state.currentSet, 'team1');
                 state.setWins.team1++;
-                // End match if team 1 or 2 has won 2 sets (best of 3)
-                if (state.setWins.team1 === 2 || state.setWins.team2 === 2) {
-                    endCurrentMatch();
-                } else if (state.currentSet === 3) {
+                // End match if team 1 or 2 has won 2 sets (best of 3, now 2-set format)
+                if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) {
                     endCurrentMatch();
                 } else {
                     setTimeout(() => {
@@ -717,10 +713,8 @@
                 // Team 2 wins the set
                 addSetToHistory(state.currentSet, 'team2');
                 state.setWins.team2++;
-                // End match if team 2 or 1 has won 2 sets (best of 3)
-                if (state.setWins.team2 === 2 || state.setWins.team1 === 2) {
-                    endCurrentMatch();
-                } else if (state.currentSet === 3) {
+                // End match if team 2 or 1 has won 2 sets (best of 3, now 2-set format)
+                if (state.setWins.team2 === 2 || state.setWins.team1 === 2 || state.currentSet === 2) {
                     endCurrentMatch();
                 } else {
                     setTimeout(() => {
@@ -753,7 +747,7 @@
             if (!state.setWins || typeof state.setWins.team1 !== 'number' || typeof state.setWins.team2 !== 'number') {
                 state.setWins = { team1: 0, team2: 0 };
             }
-            if (state.currentSet < 3) {
+            if (state.currentSet < 2) {
                 state.currentSet++;
                 state.sets[state.currentSet] = { team1: 0, team2: 0 };
                 state.totalPoints = 0;
@@ -767,7 +761,7 @@
             let team1Sets = 0;
             let team2Sets = 0;
 
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 2; i++) {
                 const set = state.sets[i];
                 if (set && (set.team1 > 0 || set.team2 > 0)) {
                     if (set.team1 > set.team2) {
@@ -814,8 +808,7 @@
             state.currentSet = 1;
             state.sets = {
                 1: { team1: 0, team2: 0 },
-                2: { team1: 0, team2: 0 },
-                3: { team1: 0, team2: 0 }
+                2: { team1: 0, team2: 0 }
             };
             state.totalPoints = 0;
             state.matchHistory = [];
@@ -842,20 +835,14 @@
         function updateSetIndicator() {
             set1Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
             set2Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
-            set3Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+            // No set3Indicator
             
             if (state.currentSet === 1) {
                 set1Indicator.classList.add('bg-blue-600', 'text-white');
                 set2Indicator.classList.add('bg-gray-300');
-                set3Indicator.classList.add('bg-gray-300');
             } else if (state.currentSet === 2) {
                 set1Indicator.classList.add('bg-gray-300');
                 set2Indicator.classList.add('bg-blue-600', 'text-white');
-                set3Indicator.classList.add('bg-gray-300');
-            } else {
-                set1Indicator.classList.add('bg-gray-300');
-                set2Indicator.classList.add('bg-gray-300');
-                set3Indicator.classList.add('bg-blue-600', 'text-white');
             }
         }
 
