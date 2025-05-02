@@ -1087,7 +1087,7 @@
           <div>${match.team1} vs ${match.team2}</div>
           <div class="text-sm text-gray-500">${new Date(match.time).toLocaleString()}</div>
         </div>
-        <button class="text-red-600 hover:text-red-800" onclick="deleteMatch(${index})"><i class="fas fa-trash"></i></button>
+        <button class="text-red-600 hover:text-red-800" onclick="deleteMatch('${match._id}')"><i class="fas fa-trash"></i></button>
       `;
       list.appendChild(li);
     });
@@ -1112,8 +1112,8 @@
     }
   }
   
-    async function deleteMatch(index) {
-        await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${index}`, {
+    async function deleteMatch(matchId) {
+        await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`, {
           method: 'DELETE'
         });
         loadMatches();
