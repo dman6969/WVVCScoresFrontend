@@ -755,8 +755,14 @@
             let team2Sets = 0;
 
             for (let i = 1; i <= 3; i++) {
-                if (state.sets[i].team1 > state.sets[i].team2) team1Sets++;
-                else if (state.sets[i].team2 > state.sets[i].team1) team2Sets++;
+                const set = state.sets[i];
+                if (set && (set.team1 > 0 || set.team2 > 0)) {
+                    if (set.team1 > set.team2) {
+                        team1Sets++;
+                    } else if (set.team2 > set.team1) {
+                        team2Sets++;
+                    }
+                }
             }
 
             const matchId = document.getElementById('team1Name').value;
