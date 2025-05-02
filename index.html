@@ -693,6 +693,10 @@
             if (team1Score >= pointsToWin && team1Score >= team2Score + 2) {
                 // Team 1 wins the set
                 addSetToHistory(state.currentSet, 'team1');
+                // Increment set win counter for team1
+                if (state.setWins && typeof state.setWins.team1 === 'number') {
+                  state.setWins.team1++;
+                }
                 if (state.currentSet === 3) {
                     endCurrentMatch();
                 } else {
@@ -703,6 +707,10 @@
             } else if (team2Score >= pointsToWin && team2Score >= team1Score + 2) {
                 // Team 2 wins the set
                 addSetToHistory(state.currentSet, 'team2');
+                // Increment set win counter for team2
+                if (state.setWins && typeof state.setWins.team2 === 'number') {
+                  state.setWins.team2++;
+                }
                 if (state.currentSet === 3) {
                     endCurrentMatch();
                 } else {
@@ -728,6 +736,10 @@
 
         // Start a new set
         function startNewSet() {
+            // On first set, reset set win counters
+            if (state.currentSet === 1) {
+                state.setWins = { team1: 0, team2: 0 };
+            }
             if (state.currentSet < 3) {
                 state.currentSet++;
                 state.sets[state.currentSet] = { team1: 0, team2: 0 };
@@ -766,7 +778,9 @@
                 team1Score: totalTeam1Score,
                 team2Score: totalTeam2Score,
                 division: selectedMatch.division,
-                finalized: true
+                finalized: true,
+                setsWonTeam1: state.setWins && typeof state.setWins.team1 === 'number' ? state.setWins.team1 : team1Sets,
+                setsWonTeam2: state.setWins && typeof state.setWins.team2 === 'number' ? state.setWins.team2 : team2Sets
               })
             });
             
