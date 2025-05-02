@@ -461,6 +461,10 @@
         
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
+            // Ensure setWins is initialized before any set logic
+            if (!state.setWins || typeof state.setWins.team1 !== 'number' || typeof state.setWins.team2 !== 'number') {
+                state.setWins = { team1: 0, team2: 0 };
+            }
             // Show login modal
             loginModal.style.display = 'flex';
             
@@ -474,20 +478,20 @@
               const team1 = document.getElementById('scheduleTeam1').value;
               const team2 = document.getElementById('scheduleTeam2').value;
               const time = document.getElementById('matchTime').value;
- 
+
               if (!team1 || !team2 || !time) {
                 alert('Please fill out all match fields.');
                 return;
               }
- 
+
               const match = { division, round, court, team1, team2, time };
- 
+
               const response = await fetch('https://wvvcscorerbackend.onrender.com/api/matches', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(match)
               });
- 
+
               if (response.ok) {
                 alert('Match scheduled successfully!');
                 loadMatches();
@@ -689,15 +693,20 @@
             const team1Score = state.sets[state.currentSet].team1;
             const team2Score = state.sets[state.currentSet].team2;
             const pointsToWin = state.tournamentSettings.pointsToWin;
-            
+
+            // Ensure setWins is initialized
+            if (!state.setWins || typeof state.setWins.team1 !== 'number' || typeof state.setWins.team2 !== 'number') {
+                state.setWins = { team1: 0, team2: 0 };
+            }
+
             if (team1Score >= pointsToWin && team1Score >= team2Score + 2) {
                 // Team 1 wins the set
                 addSetToHistory(state.currentSet, 'team1');
-                // Increment set win counter for team1
-                if (state.setWins && typeof state.setWins.team1 === 'number') {
-                  state.setWins.team1++;
-                }
-                if (state.currentSet === 3) {
+                state.setWins.team1++;
+                // End match if team 1 or 2 has won 2 sets (best of 3)
+                if (state.setWins.team1 === 2 || state.setWins.team2 === 2) {
+                    endCurrentMatch();
+                } else if (state.currentSet === 3) {
                     endCurrentMatch();
                 } else {
                     setTimeout(() => {
@@ -707,11 +716,11 @@
             } else if (team2Score >= pointsToWin && team2Score >= team1Score + 2) {
                 // Team 2 wins the set
                 addSetToHistory(state.currentSet, 'team2');
-                // Increment set win counter for team2
-                if (state.setWins && typeof state.setWins.team2 === 'number') {
-                  state.setWins.team2++;
-                }
-                if (state.currentSet === 3) {
+                state.setWins.team2++;
+                // End match if team 2 or 1 has won 2 sets (best of 3)
+                if (state.setWins.team2 === 2 || state.setWins.team1 === 2) {
+                    endCurrentMatch();
+                } else if (state.currentSet === 3) {
                     endCurrentMatch();
                 } else {
                     setTimeout(() => {
@@ -738,6 +747,10 @@
         function startNewSet() {
             // On first set, reset set win counters
             if (state.currentSet === 1) {
+                state.setWins = { team1: 0, team2: 0 };
+            }
+            // Ensure setWins is always initialized before use
+            if (!state.setWins || typeof state.setWins.team1 !== 'number' || typeof state.setWins.team2 !== 'number') {
                 state.setWins = { team1: 0, team2: 0 };
             }
             if (state.currentSet < 3) {
