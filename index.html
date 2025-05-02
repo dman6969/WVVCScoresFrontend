@@ -347,16 +347,12 @@
                                 <label class="block mb-2">Team 1:</label>
                                 <select id="scheduleTeam1" class="w-full px-3 py-2 border rounded-lg">
                                     <option value="">Select Team</option>
-                                    <option value="teamA">Team A</option>
-                                    <option value="teamB">Team B</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block mb-2">Team 2:</label>
                                 <select id="scheduleTeam2" class="w-full px-3 py-2 border rounded-lg">
                                     <option value="">Select Team</option>
-                                    <option value="teamA">Team A</option>
-                                    <option value="teamB">Team B</option>
                                 </select>
                             </div>
                         </div>
@@ -1119,20 +1115,24 @@
 <script>
     // Swap team sides display and scores
     function swapSides() {
-      // Swap team display names
-      const tempName = displayTeam1.textContent;
-      displayTeam1.textContent = displayTeam2.textContent;
-      displayTeam2.textContent = tempName;
+      // Swap displayed team names
+      [displayTeam1.textContent, displayTeam2.textContent] = [displayTeam2.textContent, displayTeam1.textContent];
 
-      // Swap history headers too
-      const tempHistory = historyTeam1.textContent;
-      historyTeam1.textContent = historyTeam2.textContent;
-      historyTeam2.textContent = tempHistory;
+      // Swap history table headers
+      [historyTeam1.textContent, historyTeam2.textContent] = [historyTeam2.textContent, historyTeam1.textContent];
 
-      // Swap scores in state
+      // Swap dropdown values
+      [team1Name.value, team2Name.value] = [team2Name.value, team1Name.value];
+
+      // Swap internal state scores
       const tempScore = state.sets[state.currentSet].team1;
       state.sets[state.currentSet].team1 = state.sets[state.currentSet].team2;
       state.sets[state.currentSet].team2 = tempScore;
+
+      // Swap setWins values
+      const tempWins = state.setWins.team1;
+      state.setWins.team1 = state.setWins.team2;
+      state.setWins.team2 = tempWins;
 
       updateScores();
     }
