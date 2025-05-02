@@ -755,7 +755,7 @@
         }
 
         async function endCurrentMatch() {
-            // Determine match winner
+            // Determine set wins by recalculating from actual set scores
             let team1Sets = 0;
             let team2Sets = 0;
 
@@ -770,6 +770,9 @@
                 }
             }
 
+            // Debug log to show calculated set wins
+            console.log("📤 CALCULATED SET WINS:", team1Sets, team2Sets);
+
             const matchId = document.getElementById('team1Name').value;
             const selectedMatch = state.matches?.find(m => m._id === matchId);
             if (!selectedMatch) {
@@ -782,9 +785,6 @@
             const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
             const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
 
-            // Log set win info before sending to backend
-            console.log("📤 SENDING SET WINS:", state.setWins.team1, state.setWins.team2);
-
             await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -793,8 +793,8 @@
                 team2Score: totalTeam2Score,
                 division: selectedMatch.division,
                 finalized: true,
-                setsWonTeam1: state.setWins && typeof state.setWins.team1 === 'number' ? state.setWins.team1 : team1Sets,
-                setsWonTeam2: state.setWins && typeof state.setWins.team2 === 'number' ? state.setWins.team2 : team2Sets
+                setsWonTeam1: team1Sets,
+                setsWonTeam2: team2Sets
               })
             });
             
