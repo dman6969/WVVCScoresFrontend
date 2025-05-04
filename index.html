@@ -86,12 +86,85 @@
         <!-- Navigation Tabs -->
         <div class="flex border-b mb-8">
             <button id="scoreTab" class="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">Score Tracker</button>
+            <button id="freeplayTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Free Play Scorer</button>
             <button id="bracketTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Bracket</button>
             <button id="standingsTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Standings</button>
             <button id="archiveTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Archive</button>
             <button id="adminTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600 hidden">Admin</button>
             <button id="logoutBtn" class="ml-auto px-4 py-2 font-medium text-red-600 hover:text-red-800 hidden">Logout</button>
         </div>
+        <!-- Free Play Scorer Section -->
+        <section id="freeplaySection" class="mb-8 hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Free Play Scorer</h2>
+                <div class="flex justify-between items-center mb-8">
+                    <div class="text-center w-1/3">
+                        <input id="freeplayTeam1Name" type="text" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value="Team A">
+                    </div>
+                    <div class="text-center text-gray-500">VS</div>
+                    <div class="text-center w-1/3">
+                        <input id="freeplayTeam2Name" type="text" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value="Team B">
+                    </div>
+                </div>
+                <div id="freeplayScoreGrid" class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-blue-50 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold mb-2" id="freeplayDisplayTeam1">Team A</h3>
+                        <div class="text-5xl font-bold mb-4" id="freeplayTeam1Score">0</div>
+                        <div class="flex justify-center space-x-4">
+                            <button class="score-btn bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700" id="freeplayTeam1Add">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="score-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" id="freeplayTeam1Remove">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold mb-2" id="freeplayDisplayTeam2">Team B</h3>
+                        <div class="text-5xl font-bold mb-4" id="freeplayTeam2Score">0</div>
+                        <div class="flex justify-center space-x-4">
+                            <button class="score-btn bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700" id="freeplayTeam2Add">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="score-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" id="freeplayTeam2Remove">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-center">Match Progress</h3>
+                    <div class="flex justify-center mb-4">
+                        <div class="flex space-x-2">
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="freeplaySet1Indicator">1</div>
+                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="freeplaySet2Indicator">2</div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="freeplayNewSetBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 mr-2">New Set</button>
+                        <button id="freeplayResetBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Set History</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">Set</th>
+                                <th class="py-2 px-4 border-b" id="freeplayHistoryTeam1">Team A</th>
+                                <th class="py-2 px-4 border-b" id="freeplayHistoryTeam2">Team B</th>
+                                <th class="py-2 px-4 border-b">Winner</th>
+                            </tr>
+                        </thead>
+                        <tbody id="freeplayMatchHistory">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
         <!-- Score Tracker Section -->
         <section id="scoreSection" class="mb-8">
@@ -1293,3 +1366,270 @@ function swapSides() {
 </script>
 </body>
 </html>
+        // --- Free Play Scorer Logic ---
+        // Local state for free play scorer
+        const freeplayState = {
+            currentSet: 1,
+            sets: {
+                1: { team1: 0, team2: 0 },
+                2: { team1: 0, team2: 0 }
+            },
+            matchHistory: [],
+            totalPoints: 0,
+            setWins: { team1: 0, team2: 0 },
+            team1Name: "Team A",
+            team2Name: "Team B"
+        };
+
+        // DOM Elements for free play
+        const freeplaySection = document.getElementById('freeplaySection');
+        const freeplayTab = document.getElementById('freeplayTab');
+        const freeplayTeam1Name = document.getElementById('freeplayTeam1Name');
+        const freeplayTeam2Name = document.getElementById('freeplayTeam2Name');
+        const freeplayDisplayTeam1 = document.getElementById('freeplayDisplayTeam1');
+        const freeplayDisplayTeam2 = document.getElementById('freeplayDisplayTeam2');
+        const freeplayTeam1Score = document.getElementById('freeplayTeam1Score');
+        const freeplayTeam2Score = document.getElementById('freeplayTeam2Score');
+        const freeplayTeam1Add = document.getElementById('freeplayTeam1Add');
+        const freeplayTeam2Add = document.getElementById('freeplayTeam2Add');
+        const freeplayTeam1Remove = document.getElementById('freeplayTeam1Remove');
+        const freeplayTeam2Remove = document.getElementById('freeplayTeam2Remove');
+        const freeplaySet1Indicator = document.getElementById('freeplaySet1Indicator');
+        const freeplaySet2Indicator = document.getElementById('freeplaySet2Indicator');
+        const freeplayNewSetBtn = document.getElementById('freeplayNewSetBtn');
+        const freeplayResetBtn = document.getElementById('freeplayResetBtn');
+        const freeplayMatchHistory = document.getElementById('freeplayMatchHistory');
+        const freeplayHistoryTeam1 = document.getElementById('freeplayHistoryTeam1');
+        const freeplayHistoryTeam2 = document.getElementById('freeplayHistoryTeam2');
+
+        // Free play event listeners
+        if (freeplayTab) {
+            freeplayTab.addEventListener('click', () => showSection('freeplay'));
+        }
+        if (freeplayTeam1Name) {
+            freeplayTeam1Name.addEventListener('input', () => {
+                freeplayState.team1Name = freeplayTeam1Name.value || "Team A";
+                updateFreeplayNames();
+            });
+        }
+        if (freeplayTeam2Name) {
+            freeplayTeam2Name.addEventListener('input', () => {
+                freeplayState.team2Name = freeplayTeam2Name.value || "Team B";
+                updateFreeplayNames();
+            });
+        }
+        if (freeplayTeam1Add) {
+            freeplayTeam1Add.addEventListener('click', () => freeplayScoreChange('team1', 1));
+        }
+        if (freeplayTeam2Add) {
+            freeplayTeam2Add.addEventListener('click', () => freeplayScoreChange('team2', 1));
+        }
+        if (freeplayTeam1Remove) {
+            freeplayTeam1Remove.addEventListener('click', () => freeplayScoreChange('team1', -1));
+        }
+        if (freeplayTeam2Remove) {
+            freeplayTeam2Remove.addEventListener('click', () => freeplayScoreChange('team2', -1));
+        }
+        if (freeplayNewSetBtn) {
+            freeplayNewSetBtn.addEventListener('click', freeplayStartNewSet);
+        }
+        if (freeplayResetBtn) {
+            freeplayResetBtn.addEventListener('click', freeplayResetAll);
+        }
+
+        function updateFreeplayNames() {
+            freeplayDisplayTeam1.textContent = freeplayState.team1Name;
+            freeplayDisplayTeam2.textContent = freeplayState.team2Name;
+            freeplayHistoryTeam1.textContent = freeplayState.team1Name;
+            freeplayHistoryTeam2.textContent = freeplayState.team2Name;
+        }
+
+        function freeplayScoreChange(team, change) {
+            const curr = freeplayState.sets[freeplayState.currentSet][team];
+            const newScore = curr + change;
+            if (newScore >= 0) {
+                freeplayState.sets[freeplayState.currentSet][team] = newScore;
+                updateFreeplayScores();
+                // Animate
+                const btn = team === 'team1'
+                    ? (change > 0 ? freeplayTeam1Add : freeplayTeam1Remove)
+                    : (change > 0 ? freeplayTeam2Add : freeplayTeam2Remove);
+                btn.classList.add(change > 0 ? 'swipe-right' : 'swipe-left');
+                setTimeout(() => {
+                    btn.classList.remove('swipe-right', 'swipe-left');
+                }, 300);
+                // Side switch every 7 points (optional: can add modal)
+                if (change > 0) {
+                    freeplayState.totalPoints++;
+                } else {
+                    freeplayState.totalPoints--;
+                }
+                freeplayCheckSetWin();
+            }
+        }
+
+        function updateFreeplayScores() {
+            freeplayTeam1Score.textContent = freeplayState.sets[freeplayState.currentSet].team1;
+            freeplayTeam2Score.textContent = freeplayState.sets[freeplayState.currentSet].team2;
+        }
+
+        function updateFreeplaySetIndicator() {
+            freeplaySet1Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+            freeplaySet2Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+            if (freeplayState.currentSet === 1) {
+                freeplaySet1Indicator.classList.add('bg-blue-600', 'text-white');
+                freeplaySet2Indicator.classList.add('bg-gray-300');
+            } else if (freeplayState.currentSet === 2) {
+                freeplaySet1Indicator.classList.add('bg-gray-300');
+                freeplaySet2Indicator.classList.add('bg-blue-600', 'text-white');
+            }
+        }
+
+        function freeplayCheckSetWin() {
+            const t1 = freeplayState.sets[freeplayState.currentSet].team1;
+            const t2 = freeplayState.sets[freeplayState.currentSet].team2;
+            const pointsToWin = 21;
+            if (t1 >= pointsToWin && t1 >= t2 + 2) {
+                // Team 1 wins set
+                freeplayAddSetToHistory(freeplayState.currentSet, freeplayState.team1Name);
+                freeplayState.setWins.team1++;
+                if (freeplayState.setWins.team1 === 2 || freeplayState.setWins.team2 === 2 || freeplayState.currentSet === 2) {
+                    // End match (no save)
+                    setTimeout(freeplayResetAll, 1200);
+                } else {
+                    setTimeout(freeplayStartNewSet, 1000);
+                }
+            } else if (t2 >= pointsToWin && t2 >= t1 + 2) {
+                // Team 2 wins set
+                freeplayAddSetToHistory(freeplayState.currentSet, freeplayState.team2Name);
+                freeplayState.setWins.team2++;
+                if (freeplayState.setWins.team2 === 2 || freeplayState.setWins.team1 === 2 || freeplayState.currentSet === 2) {
+                    setTimeout(freeplayResetAll, 1200);
+                } else {
+                    setTimeout(freeplayStartNewSet, 1000);
+                }
+            }
+        }
+
+        function freeplayAddSetToHistory(setNumber, winnerName) {
+            const set = freeplayState.sets[setNumber];
+            const t1 = freeplayState.team1Name;
+            const t2 = freeplayState.team2Name;
+            let winner = '';
+            if (set.team1 > set.team2) winner = t1;
+            else if (set.team2 > set.team1) winner = t2;
+            freeplayState.matchHistory.push({
+                set: setNumber,
+                team1: set.team1,
+                team2: set.team2,
+                winner
+            });
+            updateFreeplayMatchHistory();
+        }
+
+        function freeplayStartNewSet() {
+            if (freeplayState.currentSet === 1) {
+                freeplayState.setWins = { team1: 0, team2: 0 };
+            }
+            if (freeplayState.currentSet < 2) {
+                freeplayState.currentSet++;
+                freeplayState.sets[freeplayState.currentSet] = { team1: 0, team2: 0 };
+                freeplayState.totalPoints = 0;
+                updateFreeplayScores();
+                updateFreeplaySetIndicator();
+            }
+        }
+
+        function freeplayResetAll() {
+            freeplayState.currentSet = 1;
+            freeplayState.sets = { 1: { team1: 0, team2: 0 }, 2: { team1: 0, team2: 0 } };
+            freeplayState.matchHistory = [];
+            freeplayState.totalPoints = 0;
+            freeplayState.setWins = { team1: 0, team2: 0 };
+            updateFreeplayScores();
+            updateFreeplaySetIndicator();
+            updateFreeplayMatchHistory();
+        }
+
+        function updateFreeplayMatchHistory() {
+            freeplayMatchHistory.innerHTML = '';
+            freeplayState.matchHistory.forEach(match => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-2 px-4 border-b text-center">${match.set}</td>
+                    <td class="py-2 px-4 border-b text-center ${match.winner === freeplayState.team1Name ? 'font-bold text-green-600' : ''}">${match.team1}</td>
+                    <td class="py-2 px-4 border-b text-center ${match.winner === freeplayState.team2Name ? 'font-bold text-green-600' : ''}">${match.team2}</td>
+                    <td class="py-2 px-4 border-b text-center">${match.winner}</td>
+                `;
+                freeplayMatchHistory.appendChild(row);
+            });
+        }
+
+        // Show a specific section including freeplay
+        function showSection(section) {
+            scoreSection.classList.add('hidden');
+            bracketSection.classList.add('hidden');
+            standingsSection.classList.add('hidden');
+            adminSection.classList.add('hidden');
+            archiveSection.classList.add('hidden');
+            freeplaySection.classList.add('hidden');
+
+            // Reset tab styles
+            scoreTab.classList.remove('text-blue-600', 'border-blue-600');
+            scoreTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            if (freeplayTab) {
+                freeplayTab.classList.remove('text-blue-600', 'border-blue-600');
+                freeplayTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            }
+            bracketTab.classList.remove('text-blue-600', 'border-blue-600');
+            bracketTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            standingsTab.classList.remove('text-blue-600', 'border-blue-600');
+            standingsTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            archiveTab.classList.remove('text-blue-600', 'border-blue-600');
+            archiveTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            adminTab.classList.remove('text-blue-600', 'border-blue-600');
+            adminTab.classList.add('text-gray-500', 'hover:text-blue-600');
+
+            switch(section) {
+                case 'score':
+                    scoreSection.classList.remove('hidden');
+                    scoreTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    scoreTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'freeplay':
+                    freeplaySection.classList.remove('hidden');
+                    if (freeplayTab) {
+                        freeplayTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                        freeplayTab.classList.add('text-blue-600', 'border-blue-600');
+                    }
+                    // Initialize names and scores
+                    freeplayTeam1Name.value = freeplayState.team1Name;
+                    freeplayTeam2Name.value = freeplayState.team2Name;
+                    updateFreeplayNames();
+                    updateFreeplayScores();
+                    updateFreeplaySetIndicator();
+                    updateFreeplayMatchHistory();
+                    break;
+                case 'bracket':
+                    bracketSection.classList.remove('hidden');
+                    bracketTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    bracketTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'standings':
+                    standingsSection.classList.remove('hidden');
+                    standingsTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    standingsTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'archive':
+                    archiveSection.classList.remove('hidden');
+                    archiveTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    archiveTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'admin':
+                    adminSection.classList.remove('hidden');
+                    adminTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    adminTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+            }
+        }
