@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-8">
+                <div id="scoreGrid" class="grid grid-cols-2 gap-4 mb-8">
                     <div class="bg-blue-50 rounded-lg p-4 text-center">
                         <h3 class="text-lg font-semibold mb-2" id="displayTeam1">Team A</h3>
                         <div class="text-5xl font-bold mb-4" id="team1Score">0</div>
@@ -764,77 +764,85 @@
             }
         }
 
-        async function endCurrentMatch() {
-            // Determine set wins by recalculating from actual set scores
-            let team1Sets = 0;
-            let team2Sets = 0;
+    async function endCurrentMatch() {
+        // Determine set wins by recalculating from actual set scores
+        let team1Sets = 0;
+        let team2Sets = 0;
 
-            for (let i = 1; i <= 2; i++) {
-                const set = state.sets[i];
-                if (set && (set.team1 > 0 || set.team2 > 0)) {
-                    if (set.team1 > set.team2) {
-                        team1Sets++;
-                    } else if (set.team2 > set.team1) {
-                        team2Sets++;
-                    }
+        for (let i = 1; i <= 2; i++) {
+            const set = state.sets[i];
+            if (set && (set.team1 > 0 || set.team2 > 0)) {
+                if (set.team1 > set.team2) {
+                    team1Sets++;
+                } else if (set.team2 > set.team1) {
+                    team2Sets++;
                 }
             }
-
-            // Debug log to show calculated set wins
-            console.log("📤 CALCULATED SET WINS:", team1Sets, team2Sets);
-
-            const matchId = document.getElementById('team1Name').value;
-            const selectedMatch = state.matches?.find(m => m._id === matchId);
-            if (!selectedMatch) {
-              alert("Match not found locally.");
-              return;
-            }
-
-            const matchWinner = team1Sets > team2Sets ? selectedMatch.team1 : selectedMatch.team2;
-
-            const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
-            const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
-
-            await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                team1Score: totalTeam1Score,
-                team2Score: totalTeam2Score,
-                division: selectedMatch.division,
-                finalized: true,
-                setsWonTeam1: team1Sets,
-                setsWonTeam2: team2Sets
-              })
-            });
-            
-            // Count wins/losses for teams based on total scores
-            if (totalTeam1Score > totalTeam2Score) {
-              // Team1 wins: update win for team1 and loss for team2 as needed
-            } else if (totalTeam2Score > totalTeam1Score) {
-              // Team2 wins: update win for team2 and loss for team1 as needed
-            }
-
-            // Reset for new match
-            state.currentSet = 1;
-            state.sets = {
-                1: { team1: 0, team2: 0 },
-                2: { team1: 0, team2: 0 }
-            };
-            state.totalPoints = 0;
-            state.matchHistory = [];
-
-            updateScores();
-            updateSetIndicator();
-            updateMatchHistory();
-
-            // Refresh both standings and matches after saving
-            await loadStandings();
-            await loadMatches();
-
-            showToast(`Match complete! Winner: ${matchWinner}`);
-            window.location.reload();
         }
+
+        // Debug log to show calculated set wins
+        console.log("📤 CALCULATED SET WINS:", team1Sets, team2Sets);
+
+        const matchId = document.getElementById('team1Name').value;
+        const selectedMatch = state.matches?.find(m => m._id === matchId);
+        if (!selectedMatch) {
+          alert("Match not found locally.");
+          return;
+        }
+
+        let matchWinner = team1Sets > team2Sets ? selectedMatch.team1 : selectedMatch.team2;
+
+        const confirmMsg =
+          `Confirm winner:\n1) ${selectedMatch.team1}\n2) ${selectedMatch.team2}\n\n` +
+          `Press OK to keep "${matchWinner}" or Cancel to choose the other team.`;
+
+        if (!window.confirm(confirmMsg)) {
+          matchWinner = matchWinner === selectedMatch.team1 ? selectedMatch.team2 : selectedMatch.team1;
+        }
+
+        const totalTeam1Score = Object.values(state.sets).reduce((sum, s) => sum + s.team1, 0);
+        const totalTeam2Score = Object.values(state.sets).reduce((sum, s) => sum + s.team2, 0);
+
+        await fetch(`https://wvvcscorerbackend.onrender.com/api/matches/${matchId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            team1Score: totalTeam1Score,
+            team2Score: totalTeam2Score,
+            division: selectedMatch.division,
+            finalized: true,
+            setsWonTeam1: team1Sets,
+            setsWonTeam2: team2Sets
+          })
+        });
+        
+        // Count wins/losses for teams based on total scores
+        if (totalTeam1Score > totalTeam2Score) {
+          // Team1 wins: update win for team1 and loss for team2 as needed
+        } else if (totalTeam2Score > totalTeam1Score) {
+          // Team2 wins: update win for team2 and loss for team1 as needed
+        }
+
+        // Reset for new match
+        state.currentSet = 1;
+        state.sets = {
+            1: { team1: 0, team2: 0 },
+            2: { team1: 0, team2: 0 }
+        };
+        state.totalPoints = 0;
+        state.matchHistory = [];
+
+        updateScores();
+        updateSetIndicator();
+        updateMatchHistory();
+
+        // Refresh both standings and matches after saving
+        await loadStandings();
+        await loadMatches();
+
+        showToast(`Match complete! Winner: ${matchWinner}`);
+        window.location.reload();
+    }
 
         // Update scores display
         function updateScores() {
@@ -1150,10 +1158,21 @@
 </script>
 <script>
     function swapSides() {
-      // We no longer flip any internal data or history columns.
-      // Teams physically change courts, but the scoreboard stays tied to the
-      // same team objects so set‑by‑set stats remain accurate.
-      console.log("🔄 Sides switched on court (visual only); scoreboard left/right unchanged.");
+      const grid = document.getElementById('scoreGrid');
+      if (!grid || grid.children.length < 2) return;
+
+      // Visually swap the two scoreboard columns
+      const first = grid.children[0];
+      const second = grid.children[1];
+      grid.insertBefore(second, first);   // second becomes first
+
+      // Swap displayed team names
+      [displayTeam1.textContent, displayTeam2.textContent] =
+        [displayTeam2.textContent, displayTeam1.textContent];
+
+      // Swap the visible score numbers (leave internal state alone)
+      [team1Score.textContent, team2Score.textContent] =
+        [team2Score.textContent, team1Score.textContent];
     }
 </script>
 </body>
