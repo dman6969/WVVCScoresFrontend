@@ -860,6 +860,15 @@
         // Update team names and dropdowns with error handling
         async function updateTeamNames() {
           const matchId = document.getElementById('team1Name').value;
+          // Quick, local fallback: pull team names from the option text ("Team 1 vs Team 2")
+          const selectedOptionText = team1Name.options[team1Name.selectedIndex]?.textContent || '';
+          if (selectedOptionText.includes(' vs ')) {
+            const [quickBlue, quickOrange] = selectedOptionText.split(' vs ').map(s => s.trim());
+            displayTeam1.textContent = quickBlue || 'Team A';
+            displayTeam2.textContent = quickOrange || 'Team B';
+            historyTeam1.textContent = quickBlue || 'Team A';
+            historyTeam2.textContent = quickOrange || 'Team B';
+          }
           if (!matchId) return;
 
           try {
