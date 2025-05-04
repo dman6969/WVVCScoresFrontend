@@ -1149,30 +1149,11 @@
     }
 </script>
 <script>
-    // Swap team sides display and scores, but preserve color blocks for each team
     function swapSides() {
-      // Swap display names only
-      [displayTeam1.textContent, displayTeam2.textContent] = [displayTeam2.textContent, displayTeam1.textContent];
-
-      // Swap history headers
-      [historyTeam1.textContent, historyTeam2.textContent] = [historyTeam2.textContent, historyTeam1.textContent];
-
-      // Swap internal scores
-      const tempScore = state.sets[state.currentSet].team1;
-      state.sets[state.currentSet].team1 = state.sets[state.currentSet].team2;
-      state.sets[state.currentSet].team2 = tempScore;
-
-      // Swap set win counters
-      const tempWins = state.setWins.team1;
-      state.setWins.team1 = state.setWins.team2;
-      state.setWins.team2 = tempWins;
-
-      // Swap only the *text*, not the entire block, so color blocks stay with teams
-      const tempScoreVal = team1Score.textContent;
-      team1Score.textContent = team2Score.textContent;
-      team2Score.textContent = tempScoreVal;
-
-      updateScores();
+      // We no longer flip any internal data or history columns.
+      // Teams physically change courts, but the scoreboard stays tied to the
+      // same team objects so set‑by‑set stats remain accurate.
+      console.log("🔄 Sides switched on court (visual only); scoreboard left/right unchanged.");
     }
 </script>
 </body>
