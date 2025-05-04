@@ -88,6 +88,7 @@
             <button id="scoreTab" class="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">Score Tracker</button>
             <button id="bracketTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Bracket</button>
             <button id="standingsTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Standings</button>
+            <button id="archiveTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Archive</button>
             <button id="adminTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600 hidden">Admin</button>
             <button id="logoutBtn" class="ml-auto px-4 py-2 font-medium text-red-600 hover:text-red-800 hidden">Logout</button>
         </div>
@@ -370,6 +371,17 @@
                 </div>
             </div>
         </section>
+
+        <!-- Tournament Archive Section -->
+        <section id="archiveSection" class="mb-8 hidden">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center text-blue-800">Tournament Archive</h2>
+                <div id="pastTournamentsList" class="space-y-4">
+                    <!-- Archived tournament entries will be populated here -->
+                </div>
+                <div id="archivedBracketContainer" class="relative min-w-max py-8 mt-6"></div>
+            </div>
+        </section>
     </div>
 
     <script>
@@ -421,10 +433,12 @@
         const bracketSection = document.getElementById('bracketSection');
         const standingsSection = document.getElementById('standingsSection');
         const adminSection = document.getElementById('adminSection');
+        const archiveSection = document.getElementById('archiveSection');
         
         const scoreTab = document.getElementById('scoreTab');
         const bracketTab = document.getElementById('bracketTab');
         const standingsTab = document.getElementById('standingsTab');
+        const archiveTab = document.getElementById('archiveTab');
         const adminTab = document.getElementById('adminTab');
         
         const team1Name = document.getElementById('team1Name');
@@ -553,7 +567,12 @@
             bracketTab.addEventListener('click', () => {
               showSection('bracket');
               generateBracket();
-            });            standingsTab.addEventListener('click', () => showSection('standings'));
+            });
+            standingsTab.addEventListener('click', () => showSection('standings'));
+            archiveTab.addEventListener('click', () => {
+                showSection('archive');
+                loadArchivedTournaments();
+            });
             adminTab.addEventListener('click', () => showSection('admin'));
             
             // Admin controls
@@ -625,6 +644,7 @@
             bracketSection.classList.add('hidden');
             standingsSection.classList.add('hidden');
             adminSection.classList.add('hidden');
+            archiveSection.classList.add('hidden');
             
             // Reset tab styles
             scoreTab.classList.remove('text-blue-600', 'border-blue-600');
@@ -633,6 +653,8 @@
             bracketTab.classList.add('text-gray-500', 'hover:text-blue-600');
             standingsTab.classList.remove('text-blue-600', 'border-blue-600');
             standingsTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            archiveTab.classList.remove('text-blue-600', 'border-blue-600');
+            archiveTab.classList.add('text-gray-500', 'hover:text-blue-600');
             adminTab.classList.remove('text-blue-600', 'border-blue-600');
             adminTab.classList.add('text-gray-500', 'hover:text-blue-600');
             
@@ -651,6 +673,11 @@
                     standingsSection.classList.remove('hidden');
                     standingsTab.classList.remove('text-gray-500', 'hover:text-blue-600');
                     standingsTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'archive':
+                    archiveSection.classList.remove('hidden');
+                    archiveTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    archiveTab.classList.add('text-blue-600', 'border-blue-600');
                     break;
                 case 'admin':
                     adminSection.classList.remove('hidden');
@@ -1166,6 +1193,72 @@
         toast.classList.add('hidden');
       }, 3000);
     }
+</script>
+<script>
+// Tournament Archive functions
+async function loadArchivedTournaments() {
+  const container = document.getElementById('pastTournamentsList');
+  container.innerHTML = '';
+
+  try {
+    const res = await fetch('https://wvvcscorerbackend.onrender.com/api/archive');
+    const tournaments = await res.json();
+
+    tournaments.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'border rounded-lg p-4 shadow-md';
+      div.innerHTML = `
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">${t.name}</h3>
+        <p class="text-sm text-gray-600 mb-2">${new Date(t.start).toLocaleDateString()} - ${new Date(t.end).toLocaleDateString()}</p>
+        <button onclick="viewBracket('${t._id}')" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">View Bracket</button>
+      `;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    container.innerHTML = '<div class="text-red-600">Failed to load archive.</div>';
+  }
+}
+
+async function viewBracket(tournamentId) {
+  const container = document.getElementById('archivedBracketContainer');
+  container.innerHTML = '';
+
+  try {
+    const res = await fetch(`https://wvvcscorerbackend.onrender.com/api/archive/${tournamentId}`);
+    const matches = await res.json();
+
+    const filtered = matches.filter(m => m && m.round && m.team1 && m.team2);
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="text-center text-red-500">No matches found for this tournament.</div>';
+      return;
+    }
+
+    const bracket = document.createElement('div');
+    bracket.className = 'flex flex-col items-center';
+
+    const roundGroups = {};
+    filtered.forEach(match => {
+      if (!roundGroups[match.round]) roundGroups[match.round] = [];
+      roundGroups[match.round].push(match);
+    });
+
+    Object.keys(roundGroups).forEach(roundName => {
+      const round = document.createElement('div');
+      round.className = 'flex flex-wrap justify-center gap-4 mb-8';
+
+      roundGroups[roundName].forEach(m => {
+        const match = createBracketMatch(roundName, m.team1, m.team2, m.court);
+        round.appendChild(match);
+      });
+
+      bracket.appendChild(round);
+    });
+
+    container.appendChild(bracket);
+  } catch (err) {
+    container.innerHTML = '<div class="text-red-600">Could not load archived bracket.</div>';
+  }
+}
 </script>
 <script>
 function swapSides() {
