@@ -1030,18 +1030,25 @@
           return labels[round] || round;
         }
 
-        function createBracketMatch(round, team1, team2, court) {
+        // Updated: createBracketMatch includes set scores if match has been played
+        function createBracketMatch(round, team1, team2, court, team1Score = null, team2Score = null) {
             const match = document.createElement('div');
             match.className = 'bg-white p-3 rounded-lg shadow-sm border relative bracket-match';
             match.style.minWidth = '180px';
 
-            // Use provided fallback for undefined values
             const roundText = round ? roundLabel(round) : 'Unscheduled Round';
             const courtText = court ? `Court ${court}` : 'Court ?';
+
+            let scoreLine = '';
+            if (team1Score !== null && team2Score !== null) {
+                scoreLine = `<div class="text-xs text-gray-400 mt-1">${team1Score} - ${team2Score}</div>`;
+            }
+
             match.innerHTML = `
                 <div class="text-xs font-semibold text-gray-500 mb-1">${roundText} - ${courtText}</div>
-                <div class="text-sm mb-1">${team1 || 'TBD'}</div>
-                <div class="text-sm">${team2 || 'TBD'}</div>
+                <div class="text-sm mb-1">${team1 || 'TBD'}${team1Score !== null ? ` <span class="text-xs text-gray-400">(${team1Score})</span>` : ''}</div>
+                <div class="text-sm">${team2 || 'TBD'}${team2Score !== null ? ` <span class="text-xs text-gray-400">(${team2Score})</span>` : ''}</div>
+                ${scoreLine}
             `;
 
             return match;
@@ -1242,17 +1249,17 @@ async function viewBracket(tournamentId) {
       roundGroups[match.round].push(match);
     });
 
-    Object.keys(roundGroups).forEach(roundName => {
-      const round = document.createElement('div');
-      round.className = 'flex flex-wrap justify-center gap-4 mb-8';
+              Object.keys(roundGroups).forEach(roundName => {
+                const round = document.createElement('div');
+                round.className = 'flex flex-wrap justify-center gap-4 mb-8';
 
-      roundGroups[roundName].forEach(m => {
-        const match = createBracketMatch(roundName, m.team1, m.team2, m.court);
-        round.appendChild(match);
-      });
+                roundGroups[roundName].forEach(m => {
+                  const match = createBracketMatch(roundName, m.team1, m.team2, m.court, m.team1Score, m.team2Score);
+                  round.appendChild(match);
+                });
 
-      bracket.appendChild(round);
-    });
+                bracket.appendChild(round);
+              });
 
     container.appendChild(bracket);
   } catch (err) {
