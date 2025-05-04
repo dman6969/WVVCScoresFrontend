@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-8">
+                <div id="scoreGrid" class="grid grid-cols-2 gap-4 mb-8">
                     <div class="bg-blue-50 rounded-lg p-4 text-center">
                         <h3 class="text-lg font-semibold mb-2" id="displayTeam1">Team A</h3>
                         <div class="text-5xl font-bold mb-4" id="team1Score">0</div>
@@ -1150,10 +1150,12 @@
 </script>
 <script>
     function swapSides() {
-      // We no longer flip any internal data or history columns.
-      // Teams physically change courts, but the scoreboard stays tied to the
-      // same team objects so set‑by‑set stats remain accurate.
-      console.log("🔄 Sides switched on court (visual only); scoreboard left/right unchanged.");
+      // Flip the two scoreboard columns visually without touching internal data.
+      const grid = document.getElementById('scoreGrid');
+      if (!grid || grid.children.length < 2) return;
+      const first = grid.children[0];
+      const second = grid.children[1];
+      grid.insertBefore(second, first);   // move second before first -> columns swap
     }
 </script>
 </body>
