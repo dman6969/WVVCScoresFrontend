@@ -1001,9 +1001,22 @@
             return match;
         }
 
-        // Event listeners for admin controls
+        // Event listener for bracket generation
         if (generateBracketBtn) {
-            generateBracketBtn.addEventListener('click', generateBracket);
+          generateBracketBtn.addEventListener('click', async () => {
+            const division = divisionSelect.value;
+            try {
+              // Ask backend to create the quarter‑finals (or next round)
+              await fetch(`https://wvvcscorerbackend.onrender.com/api/bracket/${encodeURIComponent(division)}`, {
+                method: 'POST'
+              });
+            } catch (err) {
+              console.error('Bracket generation request failed:', err);
+            }
+            // Reload local data and re‑render
+            await loadMatches();
+            generateBracket();
+          });
         }
 
   async function loadStandings() {
