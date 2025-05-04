@@ -507,12 +507,14 @@
         const standingsSection = document.getElementById('standingsSection');
         const adminSection = document.getElementById('adminSection');
         const archiveSection = document.getElementById('archiveSection');
+        const freeplaySection = document.getElementById('freeplaySection');
         
         const scoreTab = document.getElementById('scoreTab');
         const bracketTab = document.getElementById('bracketTab');
         const standingsTab = document.getElementById('standingsTab');
         const archiveTab = document.getElementById('archiveTab');
         const adminTab = document.getElementById('adminTab');
+        const freeplayTab = document.getElementById('freeplayTab');
         
         const team1Name = document.getElementById('team1Name');
         const team2Name = document.getElementById('team2Name');
@@ -637,6 +639,7 @@
             
             // Navigation tabs
             scoreTab.addEventListener('click', () => showSection('score'));
+            freeplayTab.addEventListener('click', () => showSection('freeplay'));
             bracketTab.addEventListener('click', () => {
               showSection('bracket');
               generateBracket();
@@ -718,10 +721,13 @@
             standingsSection.classList.add('hidden');
             adminSection.classList.add('hidden');
             archiveSection.classList.add('hidden');
+            freeplaySection.classList.add('hidden');
             
             // Reset tab styles
             scoreTab.classList.remove('text-blue-600', 'border-blue-600');
             scoreTab.classList.add('text-gray-500', 'hover:text-blue-600');
+            freeplayTab.classList.remove('text-blue-600', 'border-blue-600');
+            freeplayTab.classList.add('text-gray-500', 'hover:text-blue-600');
             bracketTab.classList.remove('text-blue-600', 'border-blue-600');
             bracketTab.classList.add('text-gray-500', 'hover:text-blue-600');
             standingsTab.classList.remove('text-blue-600', 'border-blue-600');
@@ -736,6 +742,11 @@
                     scoreSection.classList.remove('hidden');
                     scoreTab.classList.remove('text-gray-500', 'hover:text-blue-600');
                     scoreTab.classList.add('text-blue-600', 'border-blue-600');
+                    break;
+                case 'freeplay':
+                    freeplaySection.classList.remove('hidden');
+                    freeplayTab.classList.remove('text-gray-500', 'hover:text-blue-600');
+                    freeplayTab.classList.add('text-blue-600', 'border-blue-600');
                     break;
                 case 'bracket':
                     bracketSection.classList.remove('hidden');
