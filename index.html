@@ -733,14 +733,25 @@
         }
 
         // Add set to match history
-        function addSetToHistory(setNumber, winner) {
+        function addSetToHistory(setNumber, winnerName) {
+            const set = state.sets[setNumber];
+            const team1 = displayTeam1.textContent;
+            const team2 = displayTeam2.textContent;
+
+            let winner = '';
+            if (set.team1 > set.team2) {
+              winner = team1;
+            } else if (set.team2 > set.team1) {
+              winner = team2;
+            }
+
             const setResult = {
-                set: setNumber,
-                team1: state.sets[setNumber].team1,
-                team2: state.sets[setNumber].team2,
-                winner: winner === 'team1' ? team1Name.value : team2Name.value
+              set: setNumber,
+              team1: set.team1,
+              team2: set.team2,
+              winner: winner
             };
-            
+
             state.matchHistory.push(setResult);
             updateMatchHistory();
         }
