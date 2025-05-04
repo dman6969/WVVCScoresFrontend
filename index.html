@@ -874,9 +874,7 @@
             const blueName = selectedMatch.blueTeam || selectedMatch.team1;
             const orangeName = selectedMatch.orangeTeam || selectedMatch.team2;
 
-            team1Name.innerHTML = `<option value="${selectedMatch._id}" selected>${blueName}</option>`;
-            team2Name.innerHTML = `<option value="${selectedMatch._id}" selected>${orangeName}</option>`;
-
+            // Update scoreboard and history labels so Team A/B reflect the scheduled teams
             displayTeam1.textContent = blueName;
             displayTeam2.textContent = orangeName;
             historyTeam1.textContent = blueName;
