@@ -1157,15 +1157,16 @@
     }
 </script>
 <script>
-    function swapSides() {
-      const grid = document.getElementById('scoreGrid');
-      if (!grid || grid.children.length < 2) return;
+function swapSides() {
+  const grid = document.getElementById('scoreGrid');
+  if (!grid || grid.children.length < 2) return;
 
-      // Visually swap the two scoreboard columns
-      const first = grid.children[0];
-      const second = grid.children[1];
-      grid.insertBefore(second, first);   // second becomes first
-    }
+  // Swap the entire DOM blocks so each team's name, score, and buttons move together as one unit
+  const firstBlock = grid.children[0];
+  const secondBlock = grid.children[1];
+
+  grid.insertBefore(secondBlock, firstBlock);
+}
 </script>
 </body>
 </html>
