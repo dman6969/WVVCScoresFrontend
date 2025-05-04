@@ -709,7 +709,7 @@
 
             if (team1Score >= pointsToWin && team1Score >= team2Score + 2) {
                 // Team 1 wins the set
-                addSetToHistory(state.currentSet, 'team1');
+                addSetToHistory(state.currentSet, displayTeam1.textContent);
                 state.setWins.team1++; // must increment before match end
                 if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) {
                     endCurrentMatch();
@@ -720,7 +720,7 @@
                 }
             } else if (team2Score >= pointsToWin && team2Score >= team1Score + 2) {
                 // Team 2 wins the set
-                addSetToHistory(state.currentSet, 'team2');
+                addSetToHistory(state.currentSet, displayTeam2.textContent);
                 state.setWins.team2++; // must increment before match end
                 if (state.setWins.team2 === 2 || state.setWins.team1 === 2 || state.currentSet === 2) {
                     endCurrentMatch();
