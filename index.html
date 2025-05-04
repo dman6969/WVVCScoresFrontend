@@ -1165,14 +1165,6 @@
       const first = grid.children[0];
       const second = grid.children[1];
       grid.insertBefore(second, first);   // second becomes first
-
-      // Swap displayed team names
-      [displayTeam1.textContent, displayTeam2.textContent] =
-        [displayTeam2.textContent, displayTeam1.textContent];
-
-      // Swap the visible score numbers (leave internal state alone)
-      [team1Score.textContent, team2Score.textContent] =
-        [team2Score.textContent, team1Score.textContent];
     }
 </script>
 </body>
