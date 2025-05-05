@@ -1247,142 +1247,144 @@
 </script>
     <!-- --- Free Play Scorer Logic --- -->
     <script>
-    // --- Free Play Scorer Logic ---
-    (() => {
-      const stateFree = {
-        currentSet: 1,
-        sets: {
-          1: { team1: 0, team2: 0 },
-          2: { team1: 0, team2: 0 }
-        },
-        totalPoints: 0,
-        matchHistory: [],
-        setWins: { team1: 0, team2: 0 }
-      };
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Free Play Scorer Logic ---
+      (() => {
+        const stateFree = {
+          currentSet: 1,
+          sets: {
+            1: { team1: 0, team2: 0 },
+            2: { team1: 0, team2: 0 }
+          },
+          totalPoints: 0,
+          matchHistory: [],
+          setWins: { team1: 0, team2: 0 }
+        };
 
-      const fp = {
-        t1NameInput: document.getElementById('freeplayTeam1Name'),
-        t2NameInput: document.getElementById('freeplayTeam2Name'),
-        t1Display: document.getElementById('freeplayDisplayTeam1'),
-        t2Display: document.getElementById('freeplayDisplayTeam2'),
-        score1: document.getElementById('freeplayTeam1Score'),
-        score2: document.getElementById('freeplayTeam2Score'),
-        btn1Add: document.getElementById('freeplayTeam1Add'),
-        btn1Sub: document.getElementById('freeplayTeam1Remove'),
-        btn2Add: document.getElementById('freeplayTeam2Add'),
-        btn2Sub: document.getElementById('freeplayTeam2Remove'),
-        newSetBtn: document.getElementById('freeplayNewSetBtn'),
-        resetBtn: document.getElementById('freeplayResetBtn'),
-        histBody: document.getElementById('freeplayMatchHistory'),
-        histT1Header: document.getElementById('freeplayHistoryTeam1'),
-        histT2Header: document.getElementById('freeplayHistoryTeam2'),
-        setInd1: document.getElementById('freeplaySet1Indicator'),
-        setInd2: document.getElementById('freeplaySet2Indicator')
-      };
+        const fp = {
+          t1NameInput: document.getElementById('freeplayTeam1Name'),
+          t2NameInput: document.getElementById('freeplayTeam2Name'),
+          t1Display: document.getElementById('freeplayDisplayTeam1'),
+          t2Display: document.getElementById('freeplayDisplayTeam2'),
+          score1: document.getElementById('freeplayTeam1Score'),
+          score2: document.getElementById('freeplayTeam2Score'),
+          btn1Add: document.getElementById('freeplayTeam1Add'),
+          btn1Sub: document.getElementById('freeplayTeam1Remove'),
+          btn2Add: document.getElementById('freeplayTeam2Add'),
+          btn2Sub: document.getElementById('freeplayTeam2Remove'),
+          newSetBtn: document.getElementById('freeplayNewSetBtn'),
+          resetBtn: document.getElementById('freeplayResetBtn'),
+          histBody: document.getElementById('freeplayMatchHistory'),
+          histT1Header: document.getElementById('freeplayHistoryTeam1'),
+          histT2Header: document.getElementById('freeplayHistoryTeam2'),
+          setInd1: document.getElementById('freeplaySet1Indicator'),
+          setInd2: document.getElementById('freeplaySet2Indicator')
+        };
 
-      function updateNames() {
-        fp.t1Display.textContent = fp.t1NameInput.value;
-        fp.t2Display.textContent = fp.t2NameInput.value;
-        fp.histT1Header.textContent = fp.t1NameInput.value;
-        fp.histT2Header.textContent = fp.t2NameInput.value;
-      }
-
-      function updateScores() {
-        fp.score1.textContent = stateFree.sets[stateFree.currentSet].team1;
-        fp.score2.textContent = stateFree.sets[stateFree.currentSet].team2;
-      }
-
-      function updateIndicators() {
-        fp.setInd1.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
-        fp.setInd2.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
-        if (stateFree.currentSet === 1) {
-          fp.setInd1.classList.add('bg-blue-600', 'text-white');
-        } else {
-          fp.setInd2.classList.add('bg-blue-600', 'text-white');
+        function updateNames() {
+          fp.t1Display.textContent = fp.t1NameInput.value;
+          fp.t2Display.textContent = fp.t2NameInput.value;
+          fp.histT1Header.textContent = fp.t1NameInput.value;
+          fp.histT2Header.textContent = fp.t2NameInput.value;
         }
-      }
 
-      function renderHistory() {
-        fp.histBody.innerHTML = '';
-        stateFree.matchHistory.forEach(h => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td class="py-2 px-4 border-b text-center">${h.set}</td>
-            <td class="py-2 px-4 border-b text-center">${h.team1}</td>
-            <td class="py-2 px-4 border-b text-center">${h.team2}</td>
-            <td class="py-2 px-4 border-b text-center">${h.winner}</td>
-          `;
-          fp.histBody.appendChild(row);
-        });
-      }
+        function updateScores() {
+          fp.score1.textContent = stateFree.sets[stateFree.currentSet].team1;
+          fp.score2.textContent = stateFree.sets[stateFree.currentSet].team2;
+        }
 
-      function handleFreeScore(team, change) {
-        const score = stateFree.sets[stateFree.currentSet][team];
-        const updated = score + change;
-        if (updated >= 0) {
-          stateFree.sets[stateFree.currentSet][team] = updated;
+        function updateIndicators() {
+          fp.setInd1.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
+          fp.setInd2.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
+          if (stateFree.currentSet === 1) {
+            fp.setInd1.classList.add('bg-blue-600', 'text-white');
+          } else {
+            fp.setInd2.classList.add('bg-blue-600', 'text-white');
+          }
+        }
+
+        function renderHistory() {
+          fp.histBody.innerHTML = '';
+          stateFree.matchHistory.forEach(h => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td class="py-2 px-4 border-b text-center">${h.set}</td>
+              <td class="py-2 px-4 border-b text-center">${h.team1}</td>
+              <td class="py-2 px-4 border-b text-center">${h.team2}</td>
+              <td class="py-2 px-4 border-b text-center">${h.winner}</td>
+            `;
+            fp.histBody.appendChild(row);
+          });
+        }
+
+        function handleFreeScore(team, change) {
+          const score = stateFree.sets[stateFree.currentSet][team];
+          const updated = score + change;
+          if (updated >= 0) {
+            stateFree.sets[stateFree.currentSet][team] = updated;
+            updateScores();
+            stateFree.totalPoints += change;
+          }
+          checkFreeSetWin();
+        }
+
+        function checkFreeSetWin() {
+          const t1 = stateFree.sets[stateFree.currentSet].team1;
+          const t2 = stateFree.sets[stateFree.currentSet].team2;
+          const pts = 21;
+          if (t1 >= pts && t1 >= t2 + 2) {
+            endFreeSet(fp.t1Display.textContent);
+          } else if (t2 >= pts && t2 >= t1 + 2) {
+            endFreeSet(fp.t2Display.textContent);
+          }
+        }
+
+        function endFreeSet(winner) {
+          const s = stateFree.sets[stateFree.currentSet];
+          stateFree.matchHistory.push({
+            set: stateFree.currentSet,
+            team1: s.team1,
+            team2: s.team2,
+            winner
+          });
+          if (winner === fp.t1Display.textContent) {
+            stateFree.setWins.team1++;
+          } else {
+            stateFree.setWins.team2++;
+          }
+          renderHistory();
+          if (stateFree.setWins.team1 === 2 || stateFree.setWins.team2 === 2 || stateFree.currentSet === 2) return;
+          stateFree.currentSet++;
+          stateFree.sets[stateFree.currentSet] = { team1: 0, team2: 0 };
           updateScores();
-          stateFree.totalPoints += change;
+          updateIndicators();
         }
-        checkFreeSetWin();
-      }
 
-      function checkFreeSetWin() {
-        const t1 = stateFree.sets[stateFree.currentSet].team1;
-        const t2 = stateFree.sets[stateFree.currentSet].team2;
-        const pts = 21;
-        if (t1 >= pts && t1 >= t2 + 2) {
-          endFreeSet(fp.t1Display.textContent);
-        } else if (t2 >= pts && t2 >= t1 + 2) {
-          endFreeSet(fp.t2Display.textContent);
-        }
-      }
-
-      function endFreeSet(winner) {
-        const s = stateFree.sets[stateFree.currentSet];
-        stateFree.matchHistory.push({
-          set: stateFree.currentSet,
-          team1: s.team1,
-          team2: s.team2,
-          winner
+        fp.btn1Add.addEventListener('click', () => handleFreeScore('team1', 1));
+        fp.btn1Sub.addEventListener('click', () => handleFreeScore('team1', -1));
+        fp.btn2Add.addEventListener('click', () => handleFreeScore('team2', 1));
+        fp.btn2Sub.addEventListener('click', () => handleFreeScore('team2', -1));
+        fp.newSetBtn.addEventListener('click', () => {
+          stateFree.currentSet++;
+          stateFree.sets[stateFree.currentSet] = { team1: 0, team2: 0 };
+          updateScores();
+          updateIndicators();
         });
-        if (winner === fp.t1Display.textContent) {
-          stateFree.setWins.team1++;
-        } else {
-          stateFree.setWins.team2++;
-        }
-        renderHistory();
-        if (stateFree.setWins.team1 === 2 || stateFree.setWins.team2 === 2 || stateFree.currentSet === 2) return;
-        stateFree.currentSet++;
-        stateFree.sets[stateFree.currentSet] = { team1: 0, team2: 0 };
-        updateScores();
-        updateIndicators();
-      }
+        fp.resetBtn.addEventListener('click', () => {
+          stateFree.currentSet = 1;
+          stateFree.sets = { 1: { team1: 0, team2: 0 }, 2: { team1: 0, team2: 0 } };
+          stateFree.setWins = { team1: 0, team2: 0 };
+          stateFree.matchHistory = [];
+          updateScores();
+          updateIndicators();
+          renderHistory();
+        });
+        fp.t1NameInput.addEventListener('input', updateNames);
+        fp.t2NameInput.addEventListener('input', updateNames);
 
-      fp.btn1Add.addEventListener('click', () => handleFreeScore('team1', 1));
-      fp.btn1Sub.addEventListener('click', () => handleFreeScore('team1', -1));
-      fp.btn2Add.addEventListener('click', () => handleFreeScore('team2', 1));
-      fp.btn2Sub.addEventListener('click', () => handleFreeScore('team2', -1));
-      fp.newSetBtn.addEventListener('click', () => {
-        stateFree.currentSet++;
-        stateFree.sets[stateFree.currentSet] = { team1: 0, team2: 0 };
+        updateNames();
         updateScores();
         updateIndicators();
-      });
-      fp.resetBtn.addEventListener('click', () => {
-        stateFree.currentSet = 1;
-        stateFree.sets = { 1: { team1: 0, team2: 0 }, 2: { team1: 0, team2: 0 } };
-        stateFree.setWins = { team1: 0, team2: 0 };
-        stateFree.matchHistory = [];
-        updateScores();
-        updateIndicators();
-        renderHistory();
-      });
-      fp.t1NameInput.addEventListener('input', updateNames);
-      fp.t2NameInput.addEventListener('input', updateNames);
-
-      updateNames();
-      updateScores();
-      updateIndicators();
-    })();
+      })();
+    });
     </script>
