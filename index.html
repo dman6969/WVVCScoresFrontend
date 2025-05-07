@@ -555,6 +555,39 @@ document.addEventListener('DOMContentLoaded', () => {
             matchHistory.appendChild(row);
         });
     }
+
+    // --- Standings Table Functionality ---
+    const standingsDivisionSelect = document.getElementById('standingsDivisionSelect');
+    const standingsTable = document.getElementById('standingsTable');
+
+    function renderStandings() {
+        const selectedDivision = standingsDivisionSelect.value;
+        const teamsInDivision = state.teams.filter(t => t.division === selectedDivision);
+
+        standingsTable.innerHTML = '';
+
+        const sortedTeams = teamsInDivision.sort((a, b) => b.points - a.points);
+
+        sortedTeams.forEach((team, index) => {
+            const row = document.createElement('tr');
+            const totalSets = team.setsWon;
+            const totalMatches = team.matchesPlayed;
+            const wl = totalMatches > 0 ? `${totalSets}/${totalMatches - totalSets}` : '0/0';
+
+            row.innerHTML = `
+                <td class="py-2 px-4 border-b text-center">${index + 1}</td>
+                <td class="py-2 px-4 border-b text-center">${team.name}</td>
+                <td class="py-2 px-4 border-b text-center">${team.matchesPlayed}</td>
+                <td class="py-2 px-4 border-b text-center">${team.setsWon}</td>
+                <td class="py-2 px-4 border-b text-center">${wl}</td>
+                <td class="py-2 px-4 border-b text-center">${team.points}</td>
+            `;
+            standingsTable.appendChild(row);
+        });
+    }
+
+    standingsDivisionSelect.onchange = renderStandings;
+    renderStandings();
     function handleScore(team, change) {
         const score = state.sets[state.currentSet][team];
         const updated = score + change;
@@ -586,6 +619,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (winner === displayTeam1.textContent) state.setWins.team1++;
         else state.setWins.team2++;
         renderMatchHistory();
+
+        // Update standings stats for the teams
+        const team1 = state.teams.find(t => t.name === displayTeam1.textContent);
+        const team2 = state.teams.find(t => t.name === displayTeam2.textContent);
+        if (team1 && team2) {
+            team1.matchesPlayed++;
+            team2.matchesPlayed++;
+            if (winner === team1.name) {
+                team1.setsWon++;
+                team1.points += 3;
+            } else {
+                team2.setsWon++;
+                team2.points += 3;
+            }
+            renderStandings(); // Refresh the standings table
+        }
+
         if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) return;
         state.currentSet++;
         state.sets[state.currentSet] = { team1: 0, team2: 0 };
