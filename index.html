@@ -379,6 +379,8 @@
     
 </body>
     <script>
+// Set backend base URL for fetch calls
+const BASE_URL = 'https://wvvcscorerbackend.onrender.com';
 // --- App State ---
 const state = {
     isAdmin: false,
@@ -636,6 +638,20 @@ document.addEventListener('DOMContentLoaded', () => {
             renderStandings(); // Refresh the standings table
         }
 
+        // Save set result to backend
+        fetch(`${BASE_URL}/match-results`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                winner,
+                team1: displayTeam1.textContent,
+                team2: displayTeam2.textContent,
+                setNumber: state.currentSet,
+                team1Score: state.sets[state.currentSet].team1,
+                team2Score: state.sets[state.currentSet].team2
+            })
+        });
+
         if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) return;
         state.currentSet++;
         state.sets[state.currentSet] = { team1: 0, team2: 0 };
@@ -666,21 +682,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialize Team Dropdowns ---
     function populateTeams() {
-        team1Name.innerHTML = '';
-        team2Name.innerHTML = '';
-        state.teams.forEach(t => {
-            const opt1 = document.createElement('option');
-            opt1.value = t.name;
-            opt1.textContent = t.name;
-            team1Name.appendChild(opt1);
-            const opt2 = document.createElement('option');
-            opt2.value = t.name;
-            opt2.textContent = t.name;
-            team2Name.appendChild(opt2);
-        });
-        team1Name.selectedIndex = 0;
-        team2Name.selectedIndex = 1;
-        updateTeamNames();
+        fetch(`${BASE_URL}/teams`)
+            .then(res => res.json())
+            .then(data => {
+                state.teams = data;
+                team1Name.innerHTML = '';
+                team2Name.innerHTML = '';
+                state.teams.forEach(t => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = t.name;
+                    opt1.textContent = t.name;
+                    team1Name.appendChild(opt1);
+                    const opt2 = document.createElement('option');
+                    opt2.value = t.name;
+                    opt2.textContent = t.name;
+                    team2Name.appendChild(opt2);
+                });
+                team1Name.selectedIndex = 0;
+                team2Name.selectedIndex = 1;
+                updateTeamNames();
+                renderStandings();
+                renderTeamsList();
+                populateScheduleDropdowns();
+            });
     }
     populateTeams();
     updateScoreDisplay();
@@ -730,6 +754,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 matchesPlayed: 0,
                 setsWon: 0,
                 points: 0
+            });
+            // POST new team to backend API
+            fetch(`${BASE_URL}/teams`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    division,
+                    matchesPlayed: 0,
+                    setsWon: 0,
+                    points: 0
+                })
             });
             newTeamNameInput.value = '';
             renderTeamsList();
