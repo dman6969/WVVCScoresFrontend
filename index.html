@@ -799,6 +799,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const matchDetails = {
+            division,
+            round,
+            court,
+            team1,
+            team2,
+            matchTime
+        };
+
+        // Save to backend
+        fetch(`${BASE_URL}/schedule-match`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(matchDetails)
+        })
+        .then(() => {
+            populateTeams(); // Refresh dropdowns and standings
+        });
+
+        // Display on frontend immediately
         const li = document.createElement('li');
         li.className = 'px-4 py-2 flex justify-between items-center';
         li.innerHTML = `
