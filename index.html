@@ -415,6 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginBtn = document.getElementById('loginBtn');
     const guestBtn = document.getElementById('guestBtn');
     const confirmSwitch = document.getElementById('confirmSwitch');
+    confirmSwitch.onclick = function() {
+        switchModal.style.display = 'none';
+    };
     const logoutBtn = document.getElementById('logoutBtn');
 
     const scoreSection = document.getElementById('scoreSection');
