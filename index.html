@@ -636,6 +636,93 @@ document.addEventListener('DOMContentLoaded', () => {
     updateScoreDisplay();
     updateSetIndicator();
     renderMatchHistory();
+
+    // --- Team Management and Schedule Dropdowns Sync ---
+    const newTeamNameInput = document.getElementById('newTeamName');
+    const newTeamDivisionSelect = document.getElementById('newTeamDivision');
+    const addTeamBtn = document.getElementById('addTeamBtn');
+    const teamsList = document.getElementById('teamsList');
+    const scheduleTeam1 = document.getElementById('scheduleTeam1');
+    const scheduleTeam2 = document.getElementById('scheduleTeam2');
+
+    function renderTeamsList() {
+        teamsList.innerHTML = '';
+        state.teams.forEach(team => {
+            const li = document.createElement('li');
+            li.className = 'px-3 py-2 flex justify-between';
+            li.innerHTML = `<span>${team.name} (${team.division})</span><button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>`;
+            teamsList.appendChild(li);
+        });
+    }
+
+    function populateScheduleDropdowns() {
+        scheduleTeam1.innerHTML = '<option value="">Select Team</option>';
+        scheduleTeam2.innerHTML = '<option value="">Select Team</option>';
+        state.teams.forEach(t => {
+            const opt1 = document.createElement('option');
+            opt1.value = t.name;
+            opt1.textContent = t.name;
+            scheduleTeam1.appendChild(opt1);
+            const opt2 = document.createElement('option');
+            opt2.value = t.name;
+            opt2.textContent = t.name;
+            scheduleTeam2.appendChild(opt2);
+        });
+    }
+
+    addTeamBtn.onclick = () => {
+        const name = newTeamNameInput.value.trim();
+        const division = newTeamDivisionSelect.value;
+        if (name && division) {
+            state.teams.push({
+                name,
+                division,
+                matchesPlayed: 0,
+                setsWon: 0,
+                points: 0
+            });
+            newTeamNameInput.value = '';
+            renderTeamsList();
+            populateTeams();
+            populateScheduleDropdowns();
+        }
+    };
+
+    renderTeamsList();
+    populateScheduleDropdowns();
+
+    // --- Schedule Match Logic ---
+    const scheduleMatchBtn = document.getElementById('scheduleMatchBtn');
+    const matchList = document.getElementById('matchList');
+
+    scheduleMatchBtn.onclick = () => {
+        const division = document.getElementById('scheduleDivision').value;
+        const round = document.getElementById('scheduleRound').value;
+        const court = document.getElementById('scheduleCourt').value;
+        const team1 = scheduleTeam1.value;
+        const team2 = scheduleTeam2.value;
+        const matchTime = document.getElementById('matchTime').value;
+
+        if (!division || !round || !court || !team1 || !team2 || !matchTime) {
+            alert('Please fill out all fields to schedule a match.');
+            return;
+        }
+
+        const li = document.createElement('li');
+        li.className = 'px-4 py-2 flex justify-between items-center';
+        li.innerHTML = `
+            <div>
+                <p><strong>${team1}</strong> vs <strong>${team2}</strong></p>
+                <p class="text-sm text-gray-500">${division} - ${round} - Court ${court}</p>
+                <p class="text-sm text-gray-500">${new Date(matchTime).toLocaleString()}</p>
+            </div>
+            <button class="text-red-600 hover:text-red-800" onclick="this.parentElement.remove()">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        `;
+        matchList.appendChild(li);
+    };
+
     // Default tab
     hideAllSections();
     scoreSection.classList.remove('hidden');
