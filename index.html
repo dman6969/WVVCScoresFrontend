@@ -86,85 +86,12 @@
         <!-- Navigation Tabs -->
         <div class="flex border-b mb-8">
             <button id="scoreTab" class="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">Score Tracker</button>
-            <button id="freeplayTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Free Play Scorer</button>
             <button id="bracketTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Bracket</button>
             <button id="standingsTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Standings</button>
             <button id="archiveTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600">Tournament Archive</button>
             <button id="adminTab" class="px-4 py-2 font-medium text-gray-500 hover:text-blue-600 hidden">Admin</button>
             <button id="logoutBtn" class="ml-auto px-4 py-2 font-medium text-red-600 hover:text-red-800 hidden">Logout</button>
         </div>
-        <!-- Free Play Scorer Section -->
-        <section id="freeplaySection" class="mb-8 hidden">
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Free Play Scorer</h2>
-                <div class="flex justify-between items-center mb-8">
-                    <div class="text-center w-1/3">
-                        <input id="freeplayTeam1Name" type="text" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value="Team A">
-                    </div>
-                    <div class="text-center text-gray-500">VS</div>
-                    <div class="text-center w-1/3">
-                        <input id="freeplayTeam2Name" type="text" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500" value="Team B">
-                    </div>
-                </div>
-                <div id="freeplayScoreGrid" class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="bg-blue-50 rounded-lg p-4 text-center">
-                        <h3 class="text-lg font-semibold mb-2" id="freeplayDisplayTeam1">Team A</h3>
-                        <div class="text-5xl font-bold mb-4" id="freeplayTeam1Score">0</div>
-                        <div class="flex justify-center space-x-4">
-                            <button class="score-btn bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700" id="freeplayTeam1Add">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="score-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" id="freeplayTeam1Remove">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="bg-orange-50 rounded-lg p-4 text-center">
-                        <h3 class="text-lg font-semibold mb-2" id="freeplayDisplayTeam2">Team B</h3>
-                        <div class="text-5xl font-bold mb-4" id="freeplayTeam2Score">0</div>
-                        <div class="flex justify-center space-x-4">
-                            <button class="score-btn bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700" id="freeplayTeam2Add">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="score-btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" id="freeplayTeam2Remove">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h3 class="text-lg font-semibold mb-2 text-center">Match Progress</h3>
-                    <div class="flex justify-center mb-4">
-                        <div class="flex space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="freeplaySet1Indicator">1</div>
-                            <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center" id="freeplaySet2Indicator">2</div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <button id="freeplayNewSetBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 mr-2">New Set</button>
-                        <button id="freeplayResetBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Reset</button>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Set History</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
-                        <thead>
-                            <tr>
-                                <th class="py-2 px-4 border-b">Set</th>
-                                <th class="py-2 px-4 border-b" id="freeplayHistoryTeam1">Team A</th>
-                                <th class="py-2 px-4 border-b" id="freeplayHistoryTeam2">Team B</th>
-                                <th class="py-2 px-4 border-b">Winner</th>
-                            </tr>
-                        </thead>
-                        <tbody id="freeplayMatchHistory">
-                            <!-- Will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
 
         <!-- Score Tracker Section -->
         <section id="scoreSection" class="mb-8">
@@ -451,298 +378,270 @@
 
     
 </body>
-    <!-- --- Free Play Scorer Logic --- -->
     <script>
-function initFreePlayScorer() {
-  const stateFree = {
+// --- App State ---
+const state = {
+    isAdmin: false,
     currentSet: 1,
     sets: {
-      1: { team1: 0, team2: 0 },
-      2: { team1: 0, team2: 0 }
+        1: { team1: 0, team2: 0 },
+        2: { team1: 0, team2: 0 }
     },
-    totalPoints: 0,
     matchHistory: [],
-    setWins: { team1: 0, team2: 0 }
-  };
-
-  const fp = {
-    t1NameInput: document.getElementById('freeplayTeam1Name'),
-    t2NameInput: document.getElementById('freeplayTeam2Name'),
-    t1Display: document.getElementById('freeplayDisplayTeam1'),
-    t2Display: document.getElementById('freeplayDisplayTeam2'),
-    score1: document.getElementById('freeplayTeam1Score'),
-    score2: document.getElementById('freeplayTeam2Score'),
-    btn1Add: document.getElementById('freeplayTeam1Add'),
-    btn1Sub: document.getElementById('freeplayTeam1Remove'),
-    btn2Add: document.getElementById('freeplayTeam2Add'),
-    btn2Sub: document.getElementById('freeplayTeam2Remove'),
-    newSetBtn: document.getElementById('freeplayNewSetBtn'),
-    resetBtn: document.getElementById('freeplayResetBtn'),
-    histBody: document.getElementById('freeplayMatchHistory'),
-    histT1Header: document.getElementById('freeplayHistoryTeam1'),
-    histT2Header: document.getElementById('freeplayHistoryTeam2'),
-    setInd1: document.getElementById('freeplaySet1Indicator'),
-    setInd2: document.getElementById('freeplaySet2Indicator')
-  };
-
-  function updateNames() {
-    fp.t1Display.textContent = fp.t1NameInput.value;
-    fp.t2Display.textContent = fp.t2NameInput.value;
-    fp.histT1Header.textContent = fp.t1NameInput.value;
-    fp.histT2Header.textContent = fp.t2NameInput.value;
-  }
-
-  function updateScores() {
-    fp.score1.textContent = stateFree.sets[stateFree.currentSet].team1;
-    fp.score2.textContent = stateFree.sets[stateFree.currentSet].team2;
-  }
-
-  function updateIndicators() {
-    fp.setInd1.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
-    fp.setInd2.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
-    if (stateFree.currentSet === 1) {
-      fp.setInd1.classList.add('bg-blue-600', 'text-white');
-    } else {
-      fp.setInd2.classList.add('bg-blue-600', 'text-white');
+    totalPoints: 0,
+    setWins: { team1: 0, team2: 0 },
+    teams: [
+        { name: "Team A", division: "mens", matchesPlayed: 2, setsWon: 4, points: 84 },
+        { name: "Team B", division: "womens", matchesPlayed: 2, setsWon: 3, points: 76 },
+        { name: "Team C", division: "mixed", matchesPlayed: 1, setsWon: 1, points: 35 },
+        { name: "Team D", division: "mens", matchesPlayed: 1, setsWon: 0, points: 28 }
+    ],
+    tournamentSettings: {
+        name: "West Valley Beach Volleyball Tournament",
+        format: "bestOf3",
+        pointsToWin: 21,
+        switchSides: true
     }
-  }
-
-  function renderHistory() {
-    fp.histBody.innerHTML = '';
-    stateFree.matchHistory.forEach(h => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td class="py-2 px-4 border-b text-center">${h.set}</td>
-        <td class="py-2 px-4 border-b text-center">${h.team1}</td>
-        <td class="py-2 px-4 border-b text-center">${h.team2}</td>
-        <td class="py-2 px-4 border-b text-center">${h.winner}</td>
-      `;
-      fp.histBody.appendChild(row);
-    });
-  }
-
-  function handleFreeScore(team, change) {
-    const score = stateFree.sets[stateFree.currentSet][team];
-    const updated = score + change;
-    if (updated >= 0) {
-      stateFree.sets[stateFree.currentSet][team] = updated;
-      updateScores();
-      stateFree.totalPoints += change;
-    }
-    checkFreeSetWin();
-  }
-
-  function checkFreeSetWin() {
-    const t1 = stateFree.sets[stateFree.currentSet].team1;
-    const t2 = stateFree.sets[stateFree.currentSet].team2;
-    const pts = 21;
-    if (t1 >= pts && t1 >= t2 + 2) {
-      endFreeSet(fp.t1Display.textContent);
-    } else if (t2 >= pts && t2 >= t1 + 2) {
-      endFreeSet(fp.t2Display.textContent);
-    }
-  }
-
-  function endFreeSet(winner) {
-    const s = stateFree.sets[stateFree.currentSet];
-    stateFree.matchHistory.push({
-      set: stateFree.currentSet,
-      team1: s.team1,
-      team2: s.team2,
-      winner
-    });
-    if (winner === fp.t1Display.textContent) {
-      stateFree.setWins.team1++;
-    } else {
-      stateFree.setWins.team2++;
-    }
-    renderHistory();
-    if (stateFree.setWins.team1 === 2 || stateFree.setWins.team2 === 2 || stateFree.currentSet === 2) return;
-    stateFree.currentSet++;
-    stateFree.sets[stateFree.currentSet] = { team1: 0, team2: 0 };
-    updateScores();
-    updateIndicators();
-  }
-
-  fp.btn1Add.addEventListener('click', () => handleFreeScore('team1', 1));
-  fp.btn1Sub.addEventListener('click', () => handleFreeScore('team1', -1));
-  fp.btn2Add.addEventListener('click', () => handleFreeScore('team2', 1));
-  fp.btn2Sub.addEventListener('click', () => handleFreeScore('team2', -1));
-  fp.newSetBtn.addEventListener('click', () => {
-    stateFree.currentSet++;
-    stateFree.sets[stateFree.currentSet] = { team1: 0, team2: 0 };
-    updateScores();
-    updateIndicators();
-  });
-  fp.resetBtn.addEventListener('click', () => {
-    stateFree.currentSet = 1;
-    stateFree.sets = { 1: { team1: 0, team2: 0 }, 2: { team1: 0, team2: 0 } };
-    stateFree.setWins = { team1: 0, team2: 0 };
-    stateFree.matchHistory = [];
-    updateScores();
-    updateIndicators();
-    renderHistory();
-  });
-  fp.t1NameInput.addEventListener('input', updateNames);
-  fp.t2NameInput.addEventListener('input', updateNames);
-
-  updateNames();
-  updateScores();
-  updateIndicators();
-}
-
-// Move main app logic here to after all DOM is parsed
-    // App State
-    const state = {
-        isAdmin: false,
-        currentSet: 1,
-        sets: {
-            1: { team1: 0, team2: 0 },
-            2: { team1: 0, team2: 0 }
-        },
-        matchHistory: [],
-        totalPoints: 0,
-        teams: [
-            { name: "Team A", division: "mens", matchesPlayed: 2, setsWon: 4, points: 84 },
-            { name: "Team B", division: "womens", matchesPlayed: 2, setsWon: 3, points: 76 },
-            { name: "Team C", division: "mixed", matchesPlayed: 1, setsWon: 1, points: 35 },
-            { name: "Team D", division: "mens", matchesPlayed: 1, setsWon: 0, points: 28 }
-        ],
-        tournamentSettings: {
-            name: "West Valley Beach Volleyball Tournament",
-            format: "bestOf3",
-            pointsToWin: 21,
-            switchSides: true
-        },
-        divisions: {
-            "14U Boys": ["14B1", "14B2", "14B3", "14B4", "14B5"],
-            "14U Girls": ["14G1", "14G2", "14G3", "14G4", "14G5", "14G6", "14G7"],
-            "12U Girls": ["12G1", "12G2", "12G3", "12G4"],
-            "12U Boys": ["12B1", "12B2", "12B3", "12B4"],
-            "16U Girls": ["16G1", "16G2", "16G3", "16G4"],
-            "16U Boys": ["16B1", "16B2", "16B3", "16B4"],
-            "18U Boys": ["18B1", "18B2", "18B3", "18B4"],
-            "18U Girls": ["18G1", "18G2", "18G3", "18G4"]
-        }
-    };
+};
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Free Play Scorer
-  initFreePlayScorer();
+    // DOM Elements
+    const loginModal = document.getElementById('loginModal');
+    const switchModal = document.getElementById('switchModal');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const guestBtn = document.getElementById('guestBtn');
+    const confirmSwitch = document.getElementById('confirmSwitch');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-  // Main App Logic
-  // DOM Elements
-  const loginModal = document.getElementById('loginModal');
-  const switchModal = document.getElementById('switchModal');
-  const usernameInput = document.getElementById('username');
-  const passwordInput = document.getElementById('password');
-  const loginBtn = document.getElementById('loginBtn');
-  const guestBtn = document.getElementById('guestBtn');
-  const confirmSwitch = document.getElementById('confirmSwitch');
-  const logoutBtn = document.getElementById('logoutBtn');
-  
-  const scoreSection = document.getElementById('scoreSection');
-  const bracketSection = document.getElementById('bracketSection');
-  const standingsSection = document.getElementById('standingsSection');
-  const adminSection = document.getElementById('adminSection');
-  const archiveSection = document.getElementById('archiveSection');
-  const freeplaySection = document.getElementById('freeplaySection');
-  
-  const scoreTab = document.getElementById('scoreTab');
-  const bracketTab = document.getElementById('bracketTab');
-  const standingsTab = document.getElementById('standingsTab');
-  const archiveTab = document.getElementById('archiveTab');
-  const adminTab = document.getElementById('adminTab');
-  const freeplayTab = document.getElementById('freeplayTab');
-  
-  const team1Name = document.getElementById('team1Name');
-  const team2Name = document.getElementById('team2Name');
-  const displayTeam1 = document.getElementById('displayTeam1');
-  const displayTeam2 = document.getElementById('displayTeam2');
-  const historyTeam1 = document.getElementById('historyTeam1');
-  const historyTeam2 = document.getElementById('historyTeam2');
-  const team1Score = document.getElementById('team1Score');
-  const team2Score = document.getElementById('team2Score');
-  const team1Add = document.getElementById('team-a-plus');
-  const team2Add = document.getElementById('team-b-plus');
-  const team1Remove = document.getElementById('team-a-minus');
-  const team2Remove = document.getElementById('team-b-minus');
-  const set1Indicator = document.getElementById('set1Indicator');
-  const set2Indicator = document.getElementById('set2Indicator');
-  // const set3Indicator = document.getElementById('set3Indicator');
-  const newSetBtn = document.getElementById('newSetBtn');
-  const endMatchBtn = document.getElementById('endMatchBtn');
-  const matchHistory = document.getElementById('matchHistory');
-  
-  const generateBracketBtn = document.getElementById('generateBracketBtn');
-  const divisionSelect = document.getElementById('divisionSelect');
-  const bracketContainer = document.getElementById('bracketContainer');
-  
-  const standingsDivisionSelect = document.getElementById('standingsDivisionSelect');
-  const standingsTable = document.getElementById('standingsTable');
+    const scoreSection = document.getElementById('scoreSection');
+    const bracketSection = document.getElementById('bracketSection');
+    const standingsSection = document.getElementById('standingsSection');
+    const adminSection = document.getElementById('adminSection');
+    const archiveSection = document.getElementById('archiveSection');
 
-  // Initialize the app
-  (async () => {
-      // Ensure setWins is initialized before any set logic
-      if (!state.setWins || typeof state.setWins.team1 !== 'number' || typeof state.setWins.team2 !== 'number') {
-          state.setWins = { team1: 0, team2: 0 };
-      }
-      // Show login modal
-      loginModal.style.display = 'flex';
-      
-      // Set up event listeners
-      setupEventListeners();
-      // Schedule match
-      document.getElementById('scheduleMatchBtn').addEventListener('click', async () => {
-        const division = document.getElementById('scheduleDivision').value;
-        const round = document.getElementById('scheduleRound').value;
-        const court = document.getElementById('scheduleCourt').value;
-        const team1 = document.getElementById('scheduleTeam1').value;
-        const team2 = document.getElementById('scheduleTeam2').value;
-        const time = document.getElementById('matchTime').value;
+    const scoreTab = document.getElementById('scoreTab');
+    const bracketTab = document.getElementById('bracketTab');
+    const standingsTab = document.getElementById('standingsTab');
+    const archiveTab = document.getElementById('archiveTab');
+    const adminTab = document.getElementById('adminTab');
 
-        if (!team1 || !team2 || !time) {
-          alert('Please fill out all match fields.');
-          return;
-        }
+    const team1Name = document.getElementById('team1Name');
+    const team2Name = document.getElementById('team2Name');
+    const displayTeam1 = document.getElementById('displayTeam1');
+    const displayTeam2 = document.getElementById('displayTeam2');
+    const historyTeam1 = document.getElementById('historyTeam1');
+    const historyTeam2 = document.getElementById('historyTeam2');
+    const team1Score = document.getElementById('team-a-score');
+    const team2Score = document.getElementById('team-b-score');
+    const team1Add = document.getElementById('team-a-plus');
+    const team2Add = document.getElementById('team-b-plus');
+    const team1Remove = document.getElementById('team-a-minus');
+    const team2Remove = document.getElementById('team-b-minus');
+    const set1Indicator = document.getElementById('set1Indicator');
+    const set2Indicator = document.getElementById('set2Indicator');
+    const newSetBtn = document.getElementById('newSetBtn');
+    const endMatchBtn = document.getElementById('endMatchBtn');
+    const matchHistory = document.getElementById('matchHistory');
 
-        // Assign color roles explicitly
-        const match = {
-          division,
-          round,
-          court,
-          team1,
-          team2,
-          time,
-          blueTeam: team1,   // Assign Team 1 as the team to stay with the blue card
-          orangeTeam: team2  // Assign Team 2 as the team to stay with the orange card
-        };
+    // --- Login Modal ---
+    loginModal.style.display = 'flex';
+    loginBtn.onclick = function() {
+        // Demo login: allow any username/password for now
+        state.isAdmin = true;
+        loginModal.style.display = 'none';
+        adminTab.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+    };
+    guestBtn.onclick = function() {
+        state.isAdmin = false;
+        loginModal.style.display = 'none';
+        adminTab.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+    };
+    logoutBtn.onclick = function() {
+        state.isAdmin = false;
+        loginModal.style.display = 'flex';
+        adminTab.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+    };
 
-        const response = await fetch('https://wvvcscorerbackend.onrender.com/api/matches', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(match)
+    // --- Tab Switching ---
+    function hideAllSections() {
+        scoreSection.classList.add('hidden');
+        bracketSection.classList.add('hidden');
+        standingsSection.classList.add('hidden');
+        adminSection.classList.add('hidden');
+        archiveSection.classList.add('hidden');
+    }
+    function resetTabStyles() {
+        scoreTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+        bracketTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+        standingsTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+        archiveTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+        adminTab.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+        scoreTab.classList.add('text-gray-500');
+        bracketTab.classList.add('text-gray-500');
+        standingsTab.classList.add('text-gray-500');
+        archiveTab.classList.add('text-gray-500');
+        adminTab.classList.add('text-gray-500');
+    }
+    scoreTab.onclick = function() {
+        hideAllSections();
+        resetTabStyles();
+        scoreSection.classList.remove('hidden');
+        scoreTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        scoreTab.classList.remove('text-gray-500');
+    };
+    bracketTab.onclick = function() {
+        hideAllSections();
+        resetTabStyles();
+        bracketSection.classList.remove('hidden');
+        bracketTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        bracketTab.classList.remove('text-gray-500');
+    };
+    standingsTab.onclick = function() {
+        hideAllSections();
+        resetTabStyles();
+        standingsSection.classList.remove('hidden');
+        standingsTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        standingsTab.classList.remove('text-gray-500');
+    };
+    archiveTab.onclick = function() {
+        hideAllSections();
+        resetTabStyles();
+        archiveSection.classList.remove('hidden');
+        archiveTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        archiveTab.classList.remove('text-gray-500');
+    };
+    adminTab.onclick = function() {
+        hideAllSections();
+        resetTabStyles();
+        adminSection.classList.remove('hidden');
+        adminTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+        adminTab.classList.remove('text-gray-500');
+    };
+
+    // --- Score Controls ---
+    function updateScoreDisplay() {
+        team1Score.textContent = state.sets[state.currentSet].team1;
+        team2Score.textContent = state.sets[state.currentSet].team2;
+    }
+    function updateTeamNames() {
+        const t1 = team1Name.value || "Team A";
+        const t2 = team2Name.value || "Team B";
+        displayTeam1.textContent = t1;
+        displayTeam2.textContent = t2;
+        historyTeam1.textContent = t1;
+        historyTeam2.textContent = t2;
+    }
+    function updateSetIndicator() {
+        set1Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
+        set2Indicator.className = 'w-8 h-8 rounded-full flex items-center justify-center bg-gray-300';
+        if (state.currentSet === 1) set1Indicator.classList.add('bg-blue-600', 'text-white');
+        else set2Indicator.classList.add('bg-blue-600', 'text-white');
+    }
+    function renderMatchHistory() {
+        matchHistory.innerHTML = '';
+        state.matchHistory.forEach(h => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-2 px-4 border-b text-center">${h.set}</td>
+                <td class="py-2 px-4 border-b text-center">${h.team1}</td>
+                <td class="py-2 px-4 border-b text-center">${h.team2}</td>
+                <td class="py-2 px-4 border-b text-center">${h.winner}</td>
+            `;
+            matchHistory.appendChild(row);
         });
-
-        if (response.ok) {
-          alert('Match scheduled successfully!');
-          loadMatches();
+    }
+    function handleScore(team, change) {
+        const score = state.sets[state.currentSet][team];
+        const updated = score + change;
+        if (updated >= 0) {
+            state.sets[state.currentSet][team] = updated;
+            updateScoreDisplay();
+            state.totalPoints += change;
         }
-      });
-      
-      // Update UI
-      updateSetIndicator();
-      await updateTeamNames();
-      loadTeams();
-      await loadMatches();
-      await updateTeamNames();
-      document.getElementById('standingsDivisionSelect').addEventListener('change', loadStandings);
-      loadStandings();
-      setInterval(loadStandings, 30000); // refresh every 30 seconds
-  })();
+        checkSetWin();
+    }
+    function checkSetWin() {
+        const t1 = state.sets[state.currentSet].team1;
+        const t2 = state.sets[state.currentSet].team2;
+        const pts = state.tournamentSettings.pointsToWin;
+        if (t1 >= pts && t1 >= t2 + 2) {
+            endSet(displayTeam1.textContent);
+        } else if (t2 >= pts && t2 >= t1 + 2) {
+            endSet(displayTeam2.textContent);
+        }
+    }
+    function endSet(winner) {
+        const s = state.sets[state.currentSet];
+        state.matchHistory.push({
+            set: state.currentSet,
+            team1: s.team1,
+            team2: s.team2,
+            winner
+        });
+        if (winner === displayTeam1.textContent) state.setWins.team1++;
+        else state.setWins.team2++;
+        renderMatchHistory();
+        if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) return;
+        state.currentSet++;
+        state.sets[state.currentSet] = { team1: 0, team2: 0 };
+        updateScoreDisplay();
+        updateSetIndicator();
+    }
+    team1Add.onclick = () => handleScore('team1', 1);
+    team1Remove.onclick = () => handleScore('team1', -1);
+    team2Add.onclick = () => handleScore('team2', 1);
+    team2Remove.onclick = () => handleScore('team2', -1);
+    newSetBtn.onclick = () => {
+        state.currentSet++;
+        state.sets[state.currentSet] = { team1: 0, team2: 0 };
+        updateScoreDisplay();
+        updateSetIndicator();
+    };
+    endMatchBtn.onclick = () => {
+        state.currentSet = 1;
+        state.sets = { 1: { team1: 0, team2: 0 }, 2: { team1: 0, team2: 0 } };
+        state.setWins = { team1: 0, team2: 0 };
+        state.matchHistory = [];
+        updateScoreDisplay();
+        updateSetIndicator();
+        renderMatchHistory();
+    };
+    team1Name.onchange = updateTeamNames;
+    team2Name.onchange = updateTeamNames;
 
-  // ... (rest of the functions, unchanged, can be reused from above)
-  // For brevity, you may want to move all the function definitions from the previous script here.
+    // --- Initialize Team Dropdowns ---
+    function populateTeams() {
+        team1Name.innerHTML = '';
+        team2Name.innerHTML = '';
+        state.teams.forEach(t => {
+            const opt1 = document.createElement('option');
+            opt1.value = t.name;
+            opt1.textContent = t.name;
+            team1Name.appendChild(opt1);
+            const opt2 = document.createElement('option');
+            opt2.value = t.name;
+            opt2.textContent = t.name;
+            team2Name.appendChild(opt2);
+        });
+        team1Name.selectedIndex = 0;
+        team2Name.selectedIndex = 1;
+        updateTeamNames();
+    }
+    populateTeams();
+    updateScoreDisplay();
+    updateSetIndicator();
+    renderMatchHistory();
+    // Default tab
+    hideAllSections();
+    scoreSection.classList.remove('hidden');
+    resetTabStyles();
+    scoreTab.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+    scoreTab.classList.remove('text-gray-500');
 });
     </script>
 </html>
