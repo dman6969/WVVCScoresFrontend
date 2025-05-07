@@ -604,6 +604,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const t1 = state.sets[state.currentSet].team1;
         const t2 = state.sets[state.currentSet].team2;
         const pts = state.tournamentSettings.pointsToWin;
+
+        if (state.tournamentSettings.switchSides && state.totalPoints > 0 && state.totalPoints % 7 === 0) {
+            switchModal.style.display = 'flex';
+        }
+
         if (t1 >= pts && t1 >= t2 + 2) {
             endSet(displayTeam1.textContent);
         } else if (t2 >= pts && t2 >= t1 + 2) {
