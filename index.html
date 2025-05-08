@@ -403,7 +403,8 @@ const state = {
         format: "bestOf3",
         pointsToWin: 21,
         switchSides: true
-    }
+    },
+    matchId: null // Track current match ID for updating results
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -646,19 +647,19 @@ document.addEventListener('DOMContentLoaded', () => {
             renderStandings(); // Refresh the standings table
         }
 
-        // Save set result to backend
-        fetch(`${BASE_URL}/match-results`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                winner,
-                team1: displayTeam1.textContent,
-                team2: displayTeam2.textContent,
-                setNumber: state.currentSet,
-                team1Score: state.sets[state.currentSet].team1,
-                team2Score: state.sets[state.currentSet].team2
-            })
-        });
+        // Save match result to backend using PUT to /api/matches/:id if matchId is available
+        if (state.matchId) {
+            fetch(`${BASE_URL}/api/matches/${state.matchId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    team1Score: state.sets[state.currentSet].team1,
+                    team2Score: state.sets[state.currentSet].team2,
+                    setsWonTeam1: state.setWins.team1,
+                    setsWonTeam2: state.setWins.team2
+                })
+            }).catch(err => console.error('Match update failed:', err));
+        }
 
         if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) return;
         state.currentSet++;
@@ -690,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialize Team Dropdowns ---
     function populateTeams() {
-        fetch(`${BASE_URL}/teams`)
+        fetch(`${BASE_URL}/api/teams`)
             .then(res => res.json())
             .then(data => {
                 state.teams = data;
@@ -812,13 +813,18 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Save to backend
-        fetch(`${BASE_URL}/schedule-match`, {
+        fetch(`${BASE_URL}/api/schedule-match`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(matchDetails)
         })
-        .then(() => {
+        .then(res => res.json())
+        .then(newMatch => {
             populateTeams(); // Refresh dropdowns and standings
+            // Set matchId to new match if _id is available
+            if (newMatch && newMatch._id) {
+                state.matchId = newMatch._id;
+            }
         });
 
         // Display on frontend immediately
@@ -835,7 +841,54 @@ document.addEventListener('DOMContentLoaded', () => {
             </button>
         `;
         matchList.appendChild(li);
+
+        // Set current match dropdowns to scheduled teams and update display
+        team1Name.value = team1;
+        team2Name.value = team2;
+        updateTeamNames();
     };
+
+    // --- Load scheduled matches and display them ---
+    fetch(`${BASE_URL}/api/schedule-match`)
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) return;
+
+        let latestMatch = null;
+        let latestTime = 0;
+
+        data.forEach(match => {
+          const li = document.createElement('li');
+          li.className = 'px-4 py-2 flex justify-between items-center';
+          li.innerHTML = `
+              <div>
+                  <p><strong>${match.team1}</strong> vs <strong>${match.team2}</strong></p>
+                  <p class="text-sm text-gray-500">${match.division} - ${match.round} - Court ${match.court}</p>
+                  <p class="text-sm text-gray-500">${new Date(match.matchTime).toLocaleString()}</p>
+              </div>
+              <button class="text-red-600 hover:text-red-800" onclick="this.parentElement.remove()">
+                  <i class="fas fa-trash-alt"></i>
+              </button>
+          `;
+          matchList.appendChild(li);
+
+          const matchTimestamp = new Date(match.matchTime).getTime();
+          if (matchTimestamp > latestTime) {
+            latestTime = matchTimestamp;
+            latestMatch = match;
+          }
+        });
+
+        // Set current match dropdowns to latest match and update matchId
+        if (latestMatch) {
+          team1Name.value = latestMatch.team1;
+          team2Name.value = latestMatch.team2;
+          updateTeamNames();
+          if (latestMatch._id) {
+            state.matchId = latestMatch._id;
+          }
+        }
+      });
 
     // Default tab
     hideAllSections();
