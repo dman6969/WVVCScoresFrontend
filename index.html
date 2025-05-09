@@ -890,6 +890,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+    // --- Reset All Scores Button Handler ---
+    const resetScoresBtn = document.getElementById('resetScoresBtn');
+    resetScoresBtn.onclick = () => {
+        if (confirm('Are you sure you want to reset all scores and delete all matches?')) {
+            fetch(`${BASE_URL}/api/matches`, {
+                method: 'DELETE'
+            })
+            .then(() => {
+                alert('All scores and matches have been reset.');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('Reset failed:', err);
+                alert('Failed to reset scores. Please try again.');
+            });
+        }
+    };
+
     // Default tab
     hideAllSections();
     scoreSection.classList.remove('hidden');
