@@ -776,7 +776,9 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(() => {
                 newTeamNameInput.value = '';
-                populateTeams(); // Wait for backend save to complete before refreshing UI
+                populateTeams();
+                renderTeamsList();
+                populateScheduleDropdowns();
             });
         }
     };
@@ -887,6 +889,21 @@ document.addEventListener('DOMContentLoaded', () => {
             state.matchId = latestMatch._id;
             console.log("Loaded match ID from existing matches:", state.matchId);
           }
+          // Hydrate the score state from the latest match
+          state.sets = {
+            1: {
+              team1: latestMatch.team1Score || 0,
+              team2: latestMatch.team2Score || 0
+            },
+            2: { team1: 0, team2: 0 }
+          };
+          state.setWins = {
+            team1: latestMatch.setsWonTeam1 || 0,
+            team2: latestMatch.setsWonTeam2 || 0
+          };
+          updateScoreDisplay();
+          updateSetIndicator();
+          renderMatchHistory();
         }
       });
 
