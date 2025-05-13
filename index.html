@@ -808,9 +808,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const court = document.getElementById('scheduleCourt').value;
         const team1 = scheduleTeam1.value;
         const team2 = scheduleTeam2.value;
-        const matchTime = document.getElementById('matchTime').value;
+        const rawTime = document.getElementById('matchTime').value;
+        const matchTime = new Date(rawTime).toISOString();
 
-        if (!division || !round || !court || !team1 || !team2 || !matchTime) {
+        if (!division || !round || !court || !team1 || !team2 || !rawTime) {
             alert('Please fill out all fields to schedule a match.');
             return;
         }
