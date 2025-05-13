@@ -223,7 +223,7 @@
                                 <th class="py-2 px-4 border-b">Matches Played</th>
                                 <th class="py-2 px-4 border-b">Sets Won</th>
                                 <th class="py-2 px-4 border-b">W/L</th>
-                                <th class="py-2 px-4 border-b">Points</th>
+                                <th class="py-2 px-4 border-b">Combined Points</th>
                             </tr>
                         </thead>
                         <tbody id="standingsTable">
@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="py-2 px-4 border-b text-center">${team.matchesPlayed}</td>
                 <td class="py-2 px-4 border-b text-center">${team.setsWon}</td>
                 <td class="py-2 px-4 border-b text-center">${wl}</td>
-                <td class="py-2 px-4 border-b text-center">${team.points}</td>
+                <td class="py-2 px-4 border-b text-center">${(team.points || 0) + (team.totalPointsScored || 0)}</td>
             `;
             standingsTable.appendChild(row);
         });
