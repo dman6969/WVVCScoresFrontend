@@ -223,7 +223,7 @@
                                 <th class="py-2 px-4 border-b">Matches Played</th>
                                 <th class="py-2 px-4 border-b">Sets Won</th>
                                 <th class="py-2 px-4 border-b">W/L</th>
-                                <th class="py-2 px-4 border-b">Combined Points</th>
+                                <th class="py-2 px-4 border-b">Points</th>
                             </tr>
                         </thead>
                         <tbody id="standingsTable">
@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="py-2 px-4 border-b text-center">${team.matchesPlayed}</td>
                 <td class="py-2 px-4 border-b text-center">${team.setsWon}</td>
                 <td class="py-2 px-4 border-b text-center">${wl}</td>
-                <td class="py-2 px-4 border-b text-center">${(team.points || 0) + (team.totalPointsScored || 0)}</td>
+                <td class="py-2 px-4 border-b text-center">${team.totalPointsScored || 0}</td>
             `;
             standingsTable.appendChild(row);
         });
@@ -635,14 +635,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const team1 = state.teams.find(t => t.name === displayTeam1.textContent);
         const team2 = state.teams.find(t => t.name === displayTeam2.textContent);
         if (team1 && team2) {
-            team1.matchesPlayed++;
-            team2.matchesPlayed++;
+            if (state.currentSet === 2) {
+                team1.matchesPlayed++;
+                team2.matchesPlayed++;
+            }
             if (winner === team1.name) {
                 team1.setsWon++;
-                team1.points += 3;
             } else {
                 team2.setsWon++;
-                team2.points += 3;
             }
             renderStandings(); // Refresh the standings table
         }
