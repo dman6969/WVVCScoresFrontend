@@ -645,6 +645,16 @@ document.addEventListener('DOMContentLoaded', () => {
             renderStandings(); // Refresh the standings table
         }
 
+        // Debug logging before backend update
+        console.log("== END SET TRIGGERED ==");
+        console.log("Match ID:", state.matchId);
+        console.log("Sending match data:", {
+          team1Score: state.sets[state.currentSet].team1,
+          team2Score: state.sets[state.currentSet].team2,
+          setsWonTeam1: state.setWins.team1,
+          setsWonTeam2: state.setWins.team2
+        });
+
         // Save match result to backend using PUT to /api/matches/:id if matchId is available
         if (state.matchId) {
             fetch(`${BASE_URL}/api/matches/${state.matchId}`, {
