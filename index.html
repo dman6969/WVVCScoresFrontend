@@ -890,6 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
           updateTeamNames();
           if (latestMatch._id) {
             state.matchId = latestMatch._id;
+            console.log("Loaded match ID from existing matches:", state.matchId);
           }
         }
       });
