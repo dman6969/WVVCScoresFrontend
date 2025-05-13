@@ -767,8 +767,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 setsWon: 0,
                 points: 0
             });
-            // POST new team to backend API
-            fetch(`${BASE_URL}/teams`, {
+            // POST new team to backend API (correct endpoint)
+            fetch(`${BASE_URL}/api/teams`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
