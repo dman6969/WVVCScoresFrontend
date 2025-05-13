@@ -882,6 +882,25 @@ document.addEventListener('DOMContentLoaded', () => {
                   <i class="fas fa-trash-alt"></i>
               </button>
           `;
+          // Enhance: clicking a match entry updates dropdowns, state, and UI
+          li.onclick = () => {
+            team1Name.value = match.team1;
+            team2Name.value = match.team2;
+            updateTeamNames();
+            state.matchId = match._id;
+            console.log("Selected match ID:", state.matchId);
+            state.sets = {
+              1: { team1: match.team1Score || 0, team2: match.team2Score || 0 },
+              2: { team1: 0, team2: 0 }
+            };
+            state.setWins = {
+              team1: match.setsWonTeam1 || 0,
+              team2: match.setsWonTeam2 || 0
+            };
+            updateScoreDisplay();
+            updateSetIndicator();
+            renderMatchHistory();
+          };
           matchList.appendChild(li);
 
           const matchTimestamp = new Date(match.matchTime).getTime();
