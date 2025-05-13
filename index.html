@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // Save to backend
-        fetch(`${BASE_URL}/api/schedule-match`, {
+        fetch(`${BASE_URL}/api/matches`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(matchDetails)
