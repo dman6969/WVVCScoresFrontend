@@ -350,8 +350,31 @@
                             </div>
                         </div>
                         <div class="mb-4">
+                          <label class="block mb-2">Match Date:</label>
+                          <select id="matchDate" class="w-full px-3 py-2 border rounded-lg">
+                            <option value="">Select Date</option>
+                            <option value="2025-05-17">May 17, 2025</option>
+                            <option value="2025-05-31">May 31, 2025</option>
+                            <option value="2025-06-14">June 14, 2025</option>
+                            <option value="2025-06-28">June 28, 2025</option>
+                            <option value="2025-07-12">July 12, 2025</option>
+                            <option value="2025-07-26">July 26, 2025</option>
+                          </select>
+                        </div>
+                        <div class="mb-4">
                             <label class="block mb-2">Match Time:</label>
-                            <input type="datetime-local" id="matchTime" class="w-full px-3 py-2 border rounded-lg">
+                            <select id="matchTime" class="w-full px-3 py-2 border rounded-lg">
+                              <option value="">Select Time</option>
+                              <option value="09:00">9:00 AM</option>
+                              <option value="09:50">9:50 AM</option>
+                              <option value="10:40">10:40 AM</option>
+                              <option value="11:30">11:30 AM</option>
+                              <option value="12:20">12:20 PM</option>
+                              <option value="13:10">1:10 PM</option>
+                              <option value="14:00">2:00 PM</option>
+                              <option value="14:50">2:50 PM</option>
+                              <option value="15:40">3:40 PM</option>
+                            </select>
                         </div>
                         <button id="scheduleMatchBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">Schedule Match</button>
                         <div class="mt-6">
@@ -808,13 +831,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const court = document.getElementById('scheduleCourt').value;
         const team1 = scheduleTeam1.value;
         const team2 = scheduleTeam2.value;
-        const rawTime = document.getElementById('matchTime').value;
-        const matchTime = new Date(rawTime).toISOString();
-
-        if (!division || !round || !court || !team1 || !team2 || !rawTime) {
+        const selectedDate = document.getElementById('matchDate').value;
+        const selectedTime = document.getElementById('matchTime').value;
+        if (!division || !round || !court || !team1 || !team2 || !selectedDate || !selectedTime) {
             alert('Please fill out all fields to schedule a match.');
             return;
         }
+        // Combine selected date and time into ISO string
+        const matchTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
 
         const matchDetails = {
             division,
