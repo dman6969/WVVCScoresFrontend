@@ -1001,9 +1001,12 @@ function renderBracket() {
         grouped[round].forEach(match => {
           const matchDiv = document.createElement('div');
           matchDiv.className = 'mb-3 p-4 bg-gray-100 rounded-lg shadow-sm';
+          // New code: show "TBD" if matchTime is invalid
+          const date = new Date(match.matchTime);
+          const formattedTime = isNaN(date.getTime()) ? 'TBD' : date.toLocaleString();
           matchDiv.innerHTML = `
             <p><strong>${match.team1}</strong> vs <strong>${match.team2}</strong></p>
-            <p class="text-sm text-gray-600">Court ${match.court} — ${new Date(match.matchTime).toLocaleString()}</p>
+            <p class="text-sm text-gray-600">Court ${match.court} — ${formattedTime}</p>
           `;
           roundDiv.appendChild(matchDiv);
         });
