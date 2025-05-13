@@ -773,11 +773,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     setsWon: 0,
                     points: 0
                 })
+            })
+            .then(() => {
+                newTeamNameInput.value = '';
+                populateTeams(); // Wait for backend save to complete before refreshing UI
             });
-            newTeamNameInput.value = '';
-            renderTeamsList();
-            populateTeams();
-            populateScheduleDropdowns();
         }
     };
 
