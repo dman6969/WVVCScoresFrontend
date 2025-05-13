@@ -853,6 +853,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         // Combine selected date and time into ISO string
         const matchTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
+        const dateDisplay = new Date(`${selectedDate}T${selectedTime}:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+        const timeDisplay = {
+            "09:00": "9:00 AM",
+            "09:50": "9:50 AM",
+            "10:40": "10:40 AM",
+            "11:30": "11:30 AM",
+            "12:20": "12:20 PM",
+            "13:10": "1:10 PM",
+            "14:00": "2:00 PM",
+            "14:50": "2:50 PM",
+            "15:40": "3:40 PM"
+        }[selectedTime] || selectedTime;
+        const matchLabel = `${dateDisplay} – ${timeDisplay}`;
 
         const matchDetails = {
             division,
@@ -860,7 +873,8 @@ document.addEventListener('DOMContentLoaded', () => {
             court,
             team1,
             team2,
-            matchTime
+            matchTime,
+            matchLabel
         };
 
         // Save to backend
@@ -886,7 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div>
                 <p><strong>${team1}</strong> vs <strong>${team2}</strong></p>
                 <p class="text-sm text-gray-500">${division} - ${round} - Court ${court}</p>
-                <p class="text-sm text-gray-500">${new Date(matchTime).toLocaleString()}</p>
+                <p class="text-sm text-gray-500">${matchLabel}</p>
             </div>
             <button class="text-red-600 hover:text-red-800" onclick="this.parentElement.remove()">
                 <i class="fas fa-trash-alt"></i>
@@ -1040,9 +1054,8 @@ function renderBracket() {
         grouped[round].forEach(match => {
           const matchDiv = document.createElement('div');
           matchDiv.className = 'mb-3 p-4 bg-gray-100 rounded-lg shadow-sm';
-          // New code: show "TBD" if matchTime is invalid
-          const date = new Date(match.matchTime);
-          const formattedTime = isNaN(date.getTime()) ? 'TBD' : date.toLocaleString();
+          // Use preformatted label if present, fallback to 'TBD'
+          const formattedTime = match.matchLabel || 'TBD';
           matchDiv.innerHTML = `
             <p><strong>${match.team1}</strong> vs <strong>${match.team2}</strong></p>
             <p class="text-sm text-gray-600">Court ${match.court} — ${formattedTime}</p>
