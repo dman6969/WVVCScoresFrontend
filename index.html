@@ -659,6 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch(err => console.error('Match update failed:', err));
         }
 
+        // Then return if match is over
         if (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2) return;
         state.currentSet++;
         state.sets[state.currentSet] = { team1: 0, team2: 0 };
