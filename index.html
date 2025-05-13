@@ -827,6 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Set matchId to new match if _id is available
             if (newMatch && newMatch._id) {
                 state.matchId = newMatch._id;
+                console.log("Scheduled match ID:", state.matchId);
             }
         });
 
