@@ -766,8 +766,22 @@ document.addEventListener('DOMContentLoaded', () => {
         state.teams.forEach(team => {
             const li = document.createElement('li');
             li.className = 'px-3 py-2 flex justify-between';
-            li.innerHTML = `<span>${team.name} (${team.division})</span><button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>`;
+            li.innerHTML = `<span>${team.name} (${team.division})</span><button class="text-red-600 hover:text-red-800 delete-team-btn" data-name="${team.name}"><i class="fas fa-trash"></i></button>`;
             teamsList.appendChild(li);
+        });
+        // Add event listeners for delete buttons
+        document.querySelectorAll('.delete-team-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const name = btn.getAttribute('data-name');
+            fetch(`${BASE_URL}/api/teams/${encodeURIComponent(name)}`, {
+              method: 'DELETE'
+            })
+            .then(() => {
+              populateTeams(); // refresh list
+            })
+            .catch(err => console.error('Failed to delete team:', err));
+          });
         });
     }
 
