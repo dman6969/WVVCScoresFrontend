@@ -98,6 +98,12 @@
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">Current Match</h2>
                 
+                <div class="text-center mb-6">
+                  <label for="matchSelector" class="block mb-2 text-lg font-semibold text-blue-800">Select Scheduled Match</label>
+                  <select id="matchSelector" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg">
+                    <option value="">-- Select Match --</option>
+                  </select>
+                </div>
                 <div class="flex justify-between items-center mb-8">
                     <div class="text-center w-1/3">
                       <div id="team1NameDisplay" class="px-3 py-2 border rounded-lg bg-gray-100 text-center font-bold text-lg mb-2">Team A</div>
@@ -435,6 +441,39 @@ const state = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Match Selector Dropdown ---
+    const matchSelector = document.getElementById('matchSelector');
+    // This will hold all scheduled matches
+    state.allMatches = [];
+    function populateMatchSelector(matches) {
+      matchSelector.innerHTML = '<option value="">-- Select Match --</option>';
+      matches.forEach(match => {
+        const option = document.createElement('option');
+        option.value = match._id;
+        option.textContent = `${match.team1} vs ${match.team2}`;
+        matchSelector.appendChild(option);
+      });
+    }
+    // Event listener for match selector
+    matchSelector.onchange = () => {
+      const selectedMatch = state.allMatches.find(m => m._id === matchSelector.value);
+      if (selectedMatch) {
+        state.selectedMatch = selectedMatch;
+        state.matchId = selectedMatch._id;
+        state.sets = {
+          1: { team1: selectedMatch.team1Score || 0, team2: selectedMatch.team2Score || 0 },
+          2: { team1: 0, team2: 0 }
+        };
+        state.setWins = {
+          team1: selectedMatch.setsWonTeam1 || 0,
+          team2: selectedMatch.setsWonTeam2 || 0
+        };
+        updateTeamNames();
+        updateScoreDisplay();
+        updateSetIndicator();
+        renderMatchHistory();
+      }
+    };
     // DOM Elements
     const loginModal = document.getElementById('loginModal');
     const switchModal = document.getElementById('switchModal');
@@ -931,6 +970,10 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(res => res.json())
       .then(data => {
         if (!Array.isArray(data)) return;
+        // Store all matches for selector use
+        state.allMatches = data;
+        // Populate match selector dropdown
+        populateMatchSelector(data);
 
         let latestMatch = null;
         let latestTime = 0;
@@ -965,6 +1008,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateScoreDisplay();
             updateSetIndicator();
             renderMatchHistory();
+            // Also update the dropdown selection to match this match
+            if (matchSelector) matchSelector.value = match._id || '';
           };
           matchList.appendChild(li);
 
@@ -998,6 +1043,8 @@ document.addEventListener('DOMContentLoaded', () => {
           updateScoreDisplay();
           updateSetIndicator();
           renderMatchHistory();
+          // Select latest match in dropdown
+          if (matchSelector) matchSelector.value = latestMatch._id || '';
         }
       });
 
