@@ -604,8 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
         team2Score.textContent = state.sets[state.currentSet].team2;
     }
     function updateTeamNames() {
-        const t1 = (typeof team1Name !== 'undefined' && team1Name && team1Name.value) ? team1Name.value : (state.selectedMatch?.team1 || "Team A");
-        const t2 = (typeof team2Name !== 'undefined' && team2Name && team2Name.value) ? team2Name.value : (state.selectedMatch?.team2 || "Team B");
+        const t1 = state.selectedMatch?.team1 || "Team A";
+        const t2 = state.selectedMatch?.team2 || "Team B";
         team1NameDisplay.textContent = t1;
         team2NameDisplay.textContent = t2;
         displayTeam1.textContent = t1;
