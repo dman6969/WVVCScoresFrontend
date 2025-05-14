@@ -1023,6 +1023,12 @@ function renderBracket() {
 
       bracketContainer.innerHTML = '';
 
+      // Insert general notice at the top
+      const notice = document.createElement('p');
+      notice.className = 'text-center text-lg font-bold text-gray-700 mb-6';
+      notice.textContent = "First match will begin promptly at 9:00 AM. Subsequent matches will begin as soon as the previous match is completed.";
+      bracketContainer.appendChild(notice);
+
       Object.keys(grouped).forEach(round => {
         const roundDiv = document.createElement('div');
         roundDiv.className = 'mb-6';
@@ -1047,7 +1053,7 @@ function renderBracket() {
           }
           matchDiv.innerHTML = `
             <p><strong>${match.team1}</strong> vs <strong>${match.team2}</strong></p>
-            <p class="text-sm text-gray-600">Court ${match.court} — ${formattedTime}</p>
+            <p class="text-sm text-gray-600">Court ${match.court}</p>
           `;
           roundDiv.appendChild(matchDiv);
         });
