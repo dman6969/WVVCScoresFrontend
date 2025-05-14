@@ -643,7 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         standingsTable.innerHTML = '';
 
-        const sortedTeams = teamsInDivision.sort((a, b) => b.points - a.points);
+        const sortedTeams = teamsInDivision.sort((a, b) => {
+            const aPoints = a.totalPointsScored || 0;
+            const bPoints = b.totalPointsScored || 0;
+            return bPoints - aPoints;
+        });
 
         sortedTeams.forEach((team, index) => {
             const row = document.createElement('tr');
