@@ -651,9 +651,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sortedTeams.forEach((team, index) => {
             const row = document.createElement('tr');
-            // Calculate setsLost as (matchesPlayed * 2 - setsWon)
-            const setsLost = team.matchesPlayed * 2 - team.setsWon;
-            const wl = team.matchesPlayed > 0 ? `${team.setsWon}/${setsLost}` : '0/0';
+            // Calculate match wins/losses for W/L
+            const matchWins = team.matchWins || 0;
+            const matchLosses = team.matchesPlayed - matchWins;
+            const wl = team.matchesPlayed > 0 ? `${matchWins}/${matchLosses}` : '0/0';
 
             row.innerHTML = `
                 <td class="py-2 px-4 border-b text-center">${index + 1}</td>
@@ -716,6 +717,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state.currentSet === 2) {
                 team1.matchesPlayed++;
                 team2.matchesPlayed++;
+                // Update match wins/losses after match completion (after set 2)
+                if (state.setWins.team1 > state.setWins.team2) {
+                    team1.matchWins = (team1.matchWins || 0) + 1;
+                } else {
+                    team2.matchWins = (team2.matchWins || 0) + 1;
+                }
             }
             if (winner === team1.name) {
                 team1.setsWon++;
