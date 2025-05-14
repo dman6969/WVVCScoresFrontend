@@ -1035,15 +1035,15 @@ function renderBracket() {
         grouped[round].forEach(match => {
           const matchDiv = document.createElement('div');
           matchDiv.className = 'mb-3 p-4 bg-gray-100 rounded-lg shadow-sm';
-          // Use preformatted label if present, else reconstruct from matchTime, else 'TBD'
+          // Always build formattedTime from match.matchTime
           let formattedTime = 'TBD';
-          if (match.matchLabel) {
-            formattedTime = match.matchLabel;
-          } else if (match.matchTime) {
-            const dateObj = new Date(match.matchTime);
-            const dateStr = dateObj.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
-            const timeStr = dateObj.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-            formattedTime = `${dateStr} – ${timeStr}`;
+          if (match.matchTime) {
+            const time = new Date(match.matchTime);
+            if (!isNaN(time.getTime())) {
+              const dateStr = time.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+              const timeStr = time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+              formattedTime = `${dateStr} – ${timeStr}`;
+            }
           }
           matchDiv.innerHTML = `
             <p><strong>${match.team1}</strong> vs <strong>${match.team2}</strong></p>
