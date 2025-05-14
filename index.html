@@ -100,11 +100,11 @@
                 
                 <div class="flex justify-between items-center mb-8">
                     <div class="text-center w-1/3">
-                    <select id="team1Name" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+                      <div id="team1NameDisplay" class="px-3 py-2 border rounded-lg bg-gray-100 text-center font-bold text-lg mb-2">Team A</div>
                     </div>
                     <div class="text-center text-gray-500">VS</div>
                     <div class="text-center w-1/3">
-                        <select id="team2Name" class="w-full px-3 py-2 border rounded-lg text-center font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+                      <div id="team2NameDisplay" class="px-3 py-2 border rounded-lg bg-gray-100 text-center font-bold text-lg mb-2">Team B</div>
                     </div>
                 </div>
 
@@ -460,8 +460,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const archiveTab = document.getElementById('archiveTab');
     const adminTab = document.getElementById('adminTab');
 
-    const team1Name = document.getElementById('team1Name');
-    const team2Name = document.getElementById('team2Name');
+    // const team1Name = document.getElementById('team1Name');
+    // const team2Name = document.getElementById('team2Name');
+    const team1NameDisplay = document.getElementById('team1NameDisplay');
+    const team2NameDisplay = document.getElementById('team2NameDisplay');
     const displayTeam1 = document.getElementById('displayTeam1');
     const displayTeam2 = document.getElementById('displayTeam2');
     const historyTeam1 = document.getElementById('historyTeam1');
@@ -563,8 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
         team2Score.textContent = state.sets[state.currentSet].team2;
     }
     function updateTeamNames() {
-        const t1 = team1Name.value || "Team A";
-        const t2 = team2Name.value || "Team B";
+        const t1 = (typeof team1Name !== 'undefined' && team1Name && team1Name.value) ? team1Name.value : (state.selectedMatch?.team1 || "Team A");
+        const t2 = (typeof team2Name !== 'undefined' && team2Name && team2Name.value) ? team2Name.value : (state.selectedMatch?.team2 || "Team B");
+        team1NameDisplay.textContent = t1;
+        team2NameDisplay.textContent = t2;
         displayTeam1.textContent = t1;
         displayTeam2.textContent = t2;
         historyTeam1.textContent = t1;
@@ -728,8 +732,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSetIndicator();
         renderMatchHistory();
     };
-    team1Name.onchange = updateTeamNames;
-    team2Name.onchange = updateTeamNames;
+    // team1Name.onchange = updateTeamNames;
+    // team2Name.onchange = updateTeamNames;
 
     // --- Initialize Team Dropdowns ---
     function populateTeams() {
@@ -737,20 +741,20 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(res => res.json())
             .then(data => {
                 state.teams = data;
-                team1Name.innerHTML = '';
-                team2Name.innerHTML = '';
-                state.teams.forEach(t => {
-                    const opt1 = document.createElement('option');
-                    opt1.value = t.name;
-                    opt1.textContent = t.name;
-                    team1Name.appendChild(opt1);
-                    const opt2 = document.createElement('option');
-                    opt2.value = t.name;
-                    opt2.textContent = t.name;
-                    team2Name.appendChild(opt2);
-                });
-                team1Name.selectedIndex = 0;
-                team2Name.selectedIndex = 1;
+                // team1Name.innerHTML = '';
+                // team2Name.innerHTML = '';
+                // state.teams.forEach(t => {
+                //     const opt1 = document.createElement('option');
+                //     opt1.value = t.name;
+                //     opt1.textContent = t.name;
+                //     team1Name.appendChild(opt1);
+                //     const opt2 = document.createElement('option');
+                //     opt2.value = t.name;
+                //     opt2.textContent = t.name;
+                //     team2Name.appendChild(opt2);
+                // });
+                // team1Name.selectedIndex = 0;
+                // team2Name.selectedIndex = 1;
                 updateTeamNames();
                 renderStandings();
                 renderTeamsList();
@@ -917,9 +921,8 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         matchList.appendChild(li);
 
-        // Set current match dropdowns to scheduled teams and update display
-        team1Name.value = team1;
-        team2Name.value = team2;
+        // Set current match as selected match and update display
+        state.selectedMatch = matchDetails;
         updateTeamNames();
     };
 
@@ -945,10 +948,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   <i class="fas fa-trash-alt"></i>
               </button>
           `;
-          // Enhance: clicking a match entry updates dropdowns, state, and UI
+          // Enhance: clicking a match entry updates state and UI
           li.onclick = () => {
-            team1Name.value = match.team1;
-            team2Name.value = match.team2;
+            state.selectedMatch = match;
             updateTeamNames();
             state.matchId = match._id;
             console.log("Selected match ID:", state.matchId);
@@ -973,10 +975,9 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // Set current match dropdowns to latest match and update matchId
+        // Set current match to latest match and update matchId
         if (latestMatch) {
-          team1Name.value = latestMatch.team1;
-          team2Name.value = latestMatch.team2;
+          state.selectedMatch = latestMatch;
           updateTeamNames();
           if (latestMatch._id) {
             state.matchId = latestMatch._id;
