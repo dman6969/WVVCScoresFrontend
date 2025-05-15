@@ -435,6 +435,7 @@ const state = {
         1: { team1: 0, team2: 0 },
         2: { team1: 0, team2: 0 }
     },
+    matchResultSaved: false,
     matchHistory: [],
     totalPoints: 0,
     setWins: { team1: 0, team2: 0 },
@@ -722,15 +723,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Track total points scored for each team
             team1.totalPointsScored = (team1.totalPointsScored || 0) + s.team1;
             team2.totalPointsScored = (team2.totalPointsScored || 0) + s.team2;
-            if (state.currentSet === 2) {
+            if (
+                !state.matchResultSaved &&
+                (state.setWins.team1 === 2 || state.setWins.team2 === 2 || state.currentSet === 2)
+            ) {
                 team1.matchesPlayed++;
                 team2.matchesPlayed++;
-                // Update match wins/losses after match completion (after set 2)
                 if (state.setWins.team1 > state.setWins.team2) {
                     team1.matchWins = (team1.matchWins || 0) + 1;
                 } else {
                     team2.matchWins = (team2.matchWins || 0) + 1;
                 }
+                state.matchResultSaved = true;
             }
             if (winner === team1.name) {
                 team1.setsWon++;
@@ -782,6 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSetIndicator();
     };
     endMatchBtn.onclick = () => {
+        state.matchResultSaved = false;
         state.currentSet = 1;
         state.sets = { 1: { team1: 0, team2: 0 }, 2: { team1: 0, team2: 0 } };
         state.setWins = { team1: 0, team2: 0 };
